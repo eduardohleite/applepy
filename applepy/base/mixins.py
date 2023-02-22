@@ -12,6 +12,9 @@ class StackMixin:
     def pop(self):
         return self._stack.pop()
 
+    def pop_first(self):
+        return self._stack.pop(0)
+
     def get(self):
         return self._stack[-1]
 

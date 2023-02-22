@@ -117,7 +117,7 @@ class StackedView(View, StackMixin):
 
     def parse(self):
         while self._stack:
-            el = self.pop()
+            el = self.pop_first()
             el.parse()
 
     def __enter__(self):

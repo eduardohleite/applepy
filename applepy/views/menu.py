@@ -6,7 +6,7 @@ from ..base.app import get_current_app, StatusBarApp
 from ..base.binding import Binding
 
 
-class MainMenu(StackedView):
+class MenuView(StackedView):
     def __init__(self) -> None:
         super().__init__()
 
@@ -15,6 +15,11 @@ class MainMenu(StackedView):
 
     def parse(self):
         self._main_menu = NSMenu.alloc().init()
+        return super().parse()
+
+
+class MainMenu(MenuView):
+    def parse(self):
         super().parse()
         NSApp.mainMenu = self._main_menu
         return self
@@ -27,8 +32,8 @@ class Menu(StackedView):
         super().__init__()
         self._parent_menu = get_current_app().get()
 
-        if type(self._parent_menu) != MainMenu:
-            raise Exception('Menu should be a child of MainMenu.')
+        if not isinstance(self._parent_menu, MenuView):
+            raise Exception('Menu should be a child of MenuView.')
 
         self.id = id
         self.title = title
@@ -124,11 +129,21 @@ class StatusIcon(View):
         self._image = val
         self.ns_object.image = val.value
 
+    @property
+    def menu_view(self) -> MenuView:
+        return self._menu_view
+
+    @menu_view.setter
+    def menu_view(self, val: MenuView) -> None:
+        self._menu_view = val
+        get_current_app().status_bar_icon.menu = self.menu_view.ns_object if self.menu_view else None
+
     def __init__(self) -> None:
         if not isinstance(get_current_app(), StatusBarApp):
             raise Exception('StatusIcon can only be used in a StatusBarApp')
 
         self._image = None
+        self._menu_view = None
 
         super().__init__()
 
@@ -137,7 +152,6 @@ class StatusIcon(View):
 
     def parse(self):
         super().parse()
-
         return self
 
     def set_image(self, *, image: Image, is_template: bool=True): #TODO binding
@@ -149,4 +163,11 @@ class StatusIcon(View):
 
         self._modifiers.append(__modifier)
 
+        return self
+
+    def set_menu(self, *, menu_view: Optional[MenuView]=None):
+        def __modifier():
+            self.menu_view = menu_view
+
+        self._modifiers.append(__modifier)
         return self

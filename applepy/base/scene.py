@@ -18,7 +18,7 @@ class Scene(ABC, StackMixin):
     @abstractmethod
     def parse(self):
         while self._stack:
-            el: Union[Scene, View] = self.pop()
+            el: Union[Scene, View] = self.pop_first()
             el.body().parse()
 
     @property

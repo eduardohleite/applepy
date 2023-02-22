@@ -1,1 +1,7 @@
-from .menu import MainMenu, Menu, MenuItem, StatusIcon
+from .menu import (
+    MenuView,
+    MainMenu,
+    Menu,
+    MenuItem,
+    StatusIcon
+)
