@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Union, Optional, Callable
 
 from .control import Control
 from ...backend.app_kit import NSTextField, NSObject, objc_method
@@ -56,7 +56,8 @@ class TextField(Control):
             self._text_field.stringValue = value
         
 
-    def __init__(self, *, text: Union[str, AbstractBinding]) -> None:
+    def __init__(self, *, text: Union[str, AbstractBinding],
+                          on_text_changed: Optional[Callable]=None) -> None:
         super().__init__()
 
         class _Delegate(NSObject):
@@ -65,6 +66,9 @@ class TextField(Control):
                 self.text = str(self._text_field.stringValue)
                 if self.bound_text:
                     self.bound_text.value = self._text
+
+                if on_text_changed and callable(on_text_changed):
+                    on_text_changed()
 
         self._text_field = None
         self.text = None

@@ -3,7 +3,8 @@ from ..base.mixins import Modifiable
 from ..base.transform_mixins import (
     BackgroundColor,
     AlphaValue,
-    HasShadow
+    HasShadow,
+    TitledControl
 )
 from ..backend.app_kit import (
     NSWindow,
@@ -17,7 +18,8 @@ class Window(Scene,
              Modifiable,
              BackgroundColor,
              AlphaValue,
-             HasShadow):
+             HasShadow,
+             TitledControl):
     def __init__(self,
                  *,
                  title: str,
@@ -38,8 +40,8 @@ class Window(Scene,
         Scene.__init__(self)
         Modifiable.__init__(self)
         BackgroundColor.__init__(self)
+        TitledControl.__init__(self, title)
 
-        self.title = title
         self.size = size
         self.position = position
         self.borderless = borderless
