@@ -1,7 +1,7 @@
 from typing import Union, Optional
 from rubicon.objc.types import NSEdgeInsets
 
-from ... import AbstractBinding, Padding
+from ... import AbstractBinding, Padding, Alignment
 
 
 class LayoutSpacing:
@@ -61,6 +61,39 @@ class LayoutPadding:
                 self.padding = padding.value
             else:
                 self.padding = padding
+
+        self._modifiers.append(__modifier)
+
+        return self
+
+
+class LayoutAlignment:
+    @property
+    def alignment(self) -> Alignment:
+        return self._alignment
+
+    @alignment.setter
+    def alignment(self, val: Alignment) -> None:
+        self._alignment = val
+        self.ns_object.edgeInsets = NSEdgeInsets(val.bottom,
+                                                 val.left,
+                                                 val.right,
+                                                 val.top)
+
+    def __init__(self, default_alignment: Alignment=Alignment.left) -> None:
+        self._alignment = default_alignment
+
+    def _on_alignment_changed(self, signal, sender, event):
+        self._alignment = self.bound_alignment.value
+
+    def set_alignment(self, alignment: Union[Alignment, AbstractBinding]):
+        def __modifier():
+            if isinstance(alignment, AbstractBinding):
+                self.bound_alignment = alignment
+                self.bound_alignment.on_changed.connect(self._on_alignment_changed)
+                self.alignment = alignment.value
+            else:
+                self.alignment = alignment
 
         self._modifiers.append(__modifier)
 

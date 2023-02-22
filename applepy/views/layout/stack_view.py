@@ -6,7 +6,8 @@ from ...base.mixins import Modifiable
 from ...base.transform_mixins import (
     BackgroundColor,
     LayoutSpacing,
-    LayoutPadding
+    LayoutPadding,
+    LayoutAlignment
 )
 
 
@@ -19,13 +20,15 @@ class StackView(StackedView,
                 Modifiable,
                 BackgroundColor,
                 LayoutSpacing,
-                LayoutPadding):
+                LayoutPadding,
+                LayoutAlignment):
     def __init__(self, *, orientation: StackOrientation) -> None:
         StackedView.__init__(self)
         Modifiable.__init__(self)
         BackgroundColor.__init__(self)
         LayoutPadding.__init__(self)
         LayoutSpacing.__init__(self)
+        LayoutAlignment.__init__(self)
 
         self.orientation = orientation
 
@@ -35,9 +38,6 @@ class StackView(StackedView,
     def parse(self):
         self._stack_view = NSStackView.alloc().init()
         self._stack_view.orientation = self.orientation.value
-
-        # alignment
-        self._stack_view.alignment = 1 # NSLayoutAttributeLeft
 
         if isinstance(self.parent, StackView):
             self.parent.ns_object.addArrangedSubview_(self.ns_object)
