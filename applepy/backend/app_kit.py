@@ -21,6 +21,7 @@ NSTextField = ObjCClass('NSTextField')
 NSButton = ObjCClass('NSButton')
 NSColor = ObjCClass('NSColor')
 NSControl = ObjCClass('NSControl')
+NSLayoutConstraint = ObjCClass('NSLayoutConstraint')
 
 
 NSApp = NSApplication.sharedApplication

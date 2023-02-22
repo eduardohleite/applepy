@@ -4,7 +4,7 @@ from typing import NamedTuple
 from .base.app import App, get_current_app
 from .base.scene import Scene
 from .base.view import View, StackedView, PartialView
-from .base.types import Color
+from .base.types import Color, Padding
 
 from .base.binding import (
     bindable,
@@ -24,12 +24,6 @@ class Point(NamedTuple):
 class Size(NamedTuple):
     width: int
     height: int
-
-class Padding(NamedTuple):
-    bottom: float
-    left: float
-    right: float
-    top: float
 
 
 class Alignment(Enum):

@@ -17,14 +17,12 @@ class StackOrientation(Enum):
 
 
 class StackView(StackedView,
-                Modifiable,
                 BackgroundColor,
                 LayoutSpacing,
                 LayoutPadding,
                 LayoutAlignment):
     def __init__(self, *, orientation: StackOrientation) -> None:
         StackedView.__init__(self)
-        Modifiable.__init__(self)
         BackgroundColor.__init__(self)
         LayoutPadding.__init__(self)
         LayoutSpacing.__init__(self)
