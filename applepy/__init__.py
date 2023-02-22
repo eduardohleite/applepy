@@ -1,10 +1,10 @@
 from enum import Enum
 from typing import NamedTuple
 
-from .base.app import App, get_current_app
+from .base.app import App, StatusBarApp, get_current_app
 from .base.scene import Scene
 from .base.view import View, StackedView, PartialView
-from .base.types import Color, Padding
+from .base.types import Color, Padding, Image
 
 from .base.binding import (
     bindable,

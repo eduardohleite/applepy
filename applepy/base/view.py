@@ -63,8 +63,7 @@ class View(ABC, Modifiable):
 
     @abstractmethod
     def parse(self):
-        for modifier in self._modifiers:
-            modifier()
+        return Modifiable.parse(self)
 
     @abstractmethod
     def get_ns_object(self) -> NSView:
@@ -119,7 +118,6 @@ class StackedView(View, StackMixin):
     def parse(self):
         while self._stack:
             el = self.pop()
-            #el.body().parse()
             el.parse()
 
     def __enter__(self):

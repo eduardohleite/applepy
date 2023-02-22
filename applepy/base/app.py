@@ -1,14 +1,13 @@
 from abc import ABC, abstractmethod
 from typing import Callable, Optional, Union
-from types import MethodType
 
-#from .scene import Scene
 from .mixins import StackMixin
 from ..backend.app_kit import (
     NSObject,
     NSApp,
     NSMenuItem,
     NSButton,
+    NSStatusBar,
     objc_method,
     objc_classmethod,
     SEL
@@ -67,6 +66,11 @@ class App(ABC, StackMixin):
     def quit(self):
         NSApp.terminate_(None)
 
+
+class StatusBarApp(App):
+    def __init__(self) -> None:
+        super().__init__()
+        self.status_bar_icon = NSStatusBar.systemStatusBar.statusItemWithLength_(-2.)
 
 
 def get_current_app() -> App:

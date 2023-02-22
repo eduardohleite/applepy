@@ -1,8 +1,8 @@
 from typing import Callable, Optional, Union
 
-from .. import View, StackedView
-from ..backend.app_kit import NSMenu, NSMenuItem, NSApp
-from ..base.app import get_current_app
+from .. import View, StackedView, Image
+from ..backend.app_kit import NSMenu, NSMenuItem, NSApp, NSStatusBar, NSImage, NSSize
+from ..base.app import get_current_app, StatusBarApp
 from ..base.binding import Binding
 
 
@@ -112,3 +112,40 @@ class MenuItem(View):
             self._menu_item.setAction_(
                 get_current_app().register_action(self._menu_item, self.action) 
             )
+
+
+class StatusIcon(View):
+    @property
+    def image(self) -> Image:
+        return self._image
+
+    @image.setter
+    def image(self, val: Image) -> None:
+        self._image = val
+        self.ns_object.image = val.value
+
+    def __init__(self) -> None:
+        if not isinstance(get_current_app(), StatusBarApp):
+            raise Exception('StatusIcon can only be used in a StatusBarApp')
+
+        self._image = None
+
+        super().__init__()
+
+    def get_ns_object(self):
+        return get_current_app().status_bar_icon.button
+
+    def parse(self):
+        super().parse()
+
+        return self
+
+    def set_image(self, image: Image): #TODO binding
+        def __modifier():
+            size = get_current_app().status_bar_icon.statusBar.thickness * 0.8
+            image.value.size = NSSize(size, size)
+            self.image = image
+
+        self._modifiers.append(__modifier)
+
+        return self

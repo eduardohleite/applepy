@@ -1,1 +1,1 @@
-from .menu import MainMenu, Menu, MenuItem
+from .menu import MainMenu, Menu, MenuItem, StatusIcon

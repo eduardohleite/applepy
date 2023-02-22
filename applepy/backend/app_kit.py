@@ -22,6 +22,9 @@ NSButton = ObjCClass('NSButton')
 NSColor = ObjCClass('NSColor')
 NSControl = ObjCClass('NSControl')
 NSLayoutConstraint = ObjCClass('NSLayoutConstraint')
+NSStatusBar = ObjCClass('NSStatusBar')
+NSStatusItem = ObjCClass('NSStatusItem')
+NSImage = ObjCClass('NSImage')
 
 
 NSApp = NSApplication.sharedApplication
