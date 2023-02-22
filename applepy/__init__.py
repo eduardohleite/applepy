@@ -24,3 +24,9 @@ class Point(NamedTuple):
 class Size(NamedTuple):
     width: int
     height: int
+
+class Padding(NamedTuple):
+    bottom: float
+    left: float
+    right: float
+    top: float

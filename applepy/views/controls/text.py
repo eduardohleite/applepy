@@ -56,7 +56,7 @@ class TextField(Control):
             self._text_field.stringValue = value
         
 
-    def __init__(self, text: Union[str, AbstractBinding]) -> None:
+    def __init__(self, *, text: Union[str, AbstractBinding]) -> None:
         super().__init__()
 
         class _Delegate(NSObject):

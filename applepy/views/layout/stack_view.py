@@ -1,8 +1,13 @@
 from enum import Enum
 
 from ... import StackedView
-from ...backend.app_kit import NSStackView, ObjCInstance
-from ...base.app import get_current_app
+from ...backend.app_kit import NSStackView
+from ...base.mixins import Modifiable
+from ...base.transform_mixins import (
+    BackgroundColor,
+    LayoutSpacing,
+    LayoutPadding
+)
 
 
 class StackOrientation(Enum):
@@ -10,9 +15,18 @@ class StackOrientation(Enum):
     Vertical = 1
 
 
-class StackView(StackedView):
+class StackView(StackedView,
+                Modifiable,
+                BackgroundColor,
+                LayoutSpacing,
+                LayoutPadding):
     def __init__(self, *, orientation: StackOrientation) -> None:
-        super().__init__()
+        StackedView.__init__(self)
+        Modifiable.__init__(self)
+        BackgroundColor.__init__(self)
+        LayoutPadding.__init__(self)
+        LayoutSpacing.__init__(self)
+
         self.orientation = orientation
 
     def get_ns_object(self) -> NSStackView:
@@ -22,12 +36,16 @@ class StackView(StackedView):
         self._stack_view = NSStackView.alloc().init()
         self._stack_view.orientation = self.orientation.value
 
+        # alignment
+        self._stack_view.alignment = 1 # NSLayoutAttributeLeft
+
         if isinstance(self.parent, StackView):
             self.parent.ns_object.addArrangedSubview_(self.ns_object)
         else:
             self.parent.ns_object.contentView = self.ns_object
 
-        super().parse()
+        StackedView.parse(self)
+        Modifiable.parse(self)
     
         return self
 
