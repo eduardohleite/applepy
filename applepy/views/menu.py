@@ -140,10 +140,11 @@ class StatusIcon(View):
 
         return self
 
-    def set_image(self, image: Image): #TODO binding
+    def set_image(self, *, image: Image, is_template: bool=True): #TODO binding
         def __modifier():
             size = get_current_app().status_bar_icon.statusBar.thickness * 0.8
             image.value.size = NSSize(size, size)
+            image.value.template = is_template
             self.image = image
 
         self._modifiers.append(__modifier)
