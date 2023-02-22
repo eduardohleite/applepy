@@ -15,6 +15,9 @@ class StackMixin:
     def get(self):
         return self._stack[-1]
 
+    def is_stacked(self, ptr):
+        return ptr in self._stack
+
 
 class Modifiable:
     def __init__(self) -> None:

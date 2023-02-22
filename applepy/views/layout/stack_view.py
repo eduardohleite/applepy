@@ -39,6 +39,9 @@ class StackView(StackedView,
         self._stack_view = NSStackView.alloc().init()
         self._stack_view.orientation = self.orientation.value
 
+        # TODO: alignment
+        #self._stack_view.alignment = 1 # NSLayoutAttributeLeft
+
         if isinstance(self.parent, StackView):
             self.parent.ns_object.addArrangedSubview_(self.ns_object)
         else:

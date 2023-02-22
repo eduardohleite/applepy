@@ -1,16 +1,23 @@
 from typing import Callable, Optional
 
 from ... import Color
+from ...base.transform_mixins import (
+    TitledControl, BezelColor, ControlWithState
+)
 from ...base.view import View
-from ...backend.app_kit import NSButton, NSControl
+from ...backend.app_kit import NSButton
 from ...base.app import get_current_app
 from .control import Control
 
 
-class Button(Control):
-    def __init__(self, *, title: str, action:Optional[Callable]=None) -> None:
-        super().__init__()
-        self.title = title
+class Button(Control,
+             TitledControl,
+             BezelColor):
+    def __init__(self, *, title: str, action: Optional[Callable]=None) -> None:
+        Control.__init__(self)
+        TitledControl.__init__(self, title)
+        BezelColor.__init__(self)
+
         self.action = action
 
     def get_ns_object(self) -> NSButton:
@@ -28,16 +35,14 @@ class Button(Control):
 
         return self
 
-    def color(self, color: Color):
-        def __modifier():
-            self._button.bezelColor = color.value
 
-        self._modifiers.append(__modifier)
+class Checkbox(Button,
+               ControlWithState):
 
-        return self
+    def __init__(self, *, title: str, action: Optional[Callable] = None) -> None:
+        Button.__init__(self, title=title, action=action)
+        ControlWithState.__init__(self)
 
-
-class Checkbox(Button):
     def parse(self):
         self._button = NSButton.checkboxWithTitle_target_action_(self.title, None, None)
 
@@ -47,13 +52,5 @@ class Checkbox(Button):
             )
 
         Control.parse(self)
-
-        return self
-
-    def is_checked(self, checked: bool):
-        def __modifier():
-            self._button.state = 1 if checked else 0
-
-        self._modifiers.append(__modifier)
 
         return self

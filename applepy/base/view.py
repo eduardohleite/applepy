@@ -12,7 +12,12 @@ class View(ABC):
         self._modifiers: List[Callable] = []
 
         # register itself in parent's stack
-        self.parent.stack(self)
+        # TODO: is there a better way to not stack a view with a custom body?
+        content = self.body()
+        if self.parent.is_stacked(content):
+            print('double stack')
+        else:
+            self.parent.stack(content)
 
     def body(self):
         return self
@@ -39,7 +44,8 @@ class StackedView(View, StackMixin):
     def parse(self):
         while self._stack:
             el = self.pop()
-            el.body().parse()
+            #el.body().parse()
+            el.parse()
 
     def __enter__(self):
         # register itself in the App's stack
@@ -49,3 +55,14 @@ class StackedView(View, StackMixin):
     def __exit__(self, type, value, traceback):
         # unregister itself in the App's stack
         get_current_app().pop()
+
+
+class PartialView(View):
+    def __init__(self) -> None:
+        super().__init__()
+
+    def get_ns_object(self):
+        return super().get_ns_object()
+
+    def parse(self):
+        return super().parse()
