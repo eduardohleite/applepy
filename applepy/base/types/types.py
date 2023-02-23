@@ -11,7 +11,8 @@ class Padding(NamedTuple):
     top: float
 
 
-class Point(NamedTuple):
+@dataclass
+class Point(BindableMixin):
     x: int
     y: int
 

@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Callable, Optional, Union
 
+from .utils import try_call
 from .mixins import StackMixin
 from ..backend.app_kit import (
     NSObject,
@@ -37,6 +38,7 @@ class App(ABC, StackMixin):
         self._actions = {}
 
     def _register_scene(self) -> None:
+        self._scene.is_main = True
         self._controller.mainWindow = self._scene.window
         NSApp.activateIgnoringOtherApps_(True)
 
@@ -60,8 +62,7 @@ class App(ABC, StackMixin):
 
     def invoke_action(self, caller: Union[NSMenuItem, NSButton]):
         action = self._actions.get(caller)
-        if action:
-            action()
+        try_call(action)
 
     def quit(self):
         NSApp.terminate_(None)

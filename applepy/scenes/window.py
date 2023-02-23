@@ -3,6 +3,8 @@ from typing import Callable, Optional, Union
 from .. import Scene, Size, Point
 from ..base.binding import AbstractBinding, bindable
 from ..base.mixins import Modifiable
+from ..base.utils import try_call
+from ..base.errors import AddingMultipleChildrenToNonStackableViewError
 from ..base.transform_mixins import (
     BackgroundColor,
     AlphaValue,
@@ -33,8 +35,24 @@ class Window(Scene,
         return self._size
 
     @size.setter
-    def size(self, val: Size):
+    def size(self, val: Size) -> None:
         self._size = val
+
+    @bindable(Point)
+    def position(self) -> Point:
+        return self._position
+
+    @position.setter
+    def position(self, val: Point) -> None:
+        self._position = val
+
+    @bindable(bool)
+    def full_screen(self) -> bool:
+        return self._full_screen
+
+    @full_screen.setter
+    def full_screen(self, val: bool) -> None:
+        self._full_screen = val
 
     def __init__(self,
                  *,
@@ -54,7 +72,11 @@ class Window(Scene,
                  hud_window: bool = False,
                  min_size: Optional[Size] = None,
                  max_size: Optional[Size] = None,
-                 on_close: Optional[Callable] = None) -> None:
+                 on_close: Optional[Callable] = None,
+                 on_resized: Optional[Callable] = None,
+                 on_moved: Optional[Callable] = None,
+                 on_full_screen_changed: Optional[Callable] = None,
+                 on_minimized: Optional[Callable] = None) -> None:
 
         Scene.__init__(self)
         Modifiable.__init__(self)
@@ -64,25 +86,48 @@ class Window(Scene,
         class _Delegate(NSObject):
             @objc_method
             def windowWillClose_(_self, sender):
-                if on_close and callable(on_close):
-                    on_close()
+                try_call(on_close)
 
             @objc_method
             def windowDidEndLiveResize_(_self, notification):
-                w = self.window
-                pass
+                w_rect = self.window.contentRectForFrameRect_(self.window.frame)
+                self.size = Size(int(w_rect.size.width), int(w_rect.size.height))
+                self.position = Point(int(w_rect.origin.x), int(w_rect.origin.y))
+                try_call(on_resized)
 
+            @objc_method
+            def windowDidMove_(_self, notification):
+                w_rect = self.window.contentRectForFrameRect_(self.window.frame)
+                self.position = Point(int(w_rect.origin.x), int(w_rect.origin.y))
+                try_call(on_moved)
+
+            @objc_method
+            def windowWillEnterFullScreen_(_self, notification):
+                self.full_screen = True
+                try_call(on_full_screen_changed)
+
+            @objc_method
+            def windowWillExitFullScreen_(_self, notification):
+                self.full_screen = False
+                try_call(on_full_screen_changed)
+
+            @objc_method
+            def windowDidMiniaturize_(self, notification):
+                try_call(on_minimized)
 
         self._controller = _Delegate.alloc().init()
 
+        # bindables
         self._size = size
-        self.position = position
+        self._position = position
+        self._full_screen = full_screen
+
+        # regular properties
         self.borderless = borderless
         self.titled = titled
         self.closable = closable
         self.resizable = resizable
         self.miniaturizable = miniaturizable
-        self.full_screen = full_screen
         self.full_size_content_view = full_size_content_view
         self.utility_window = utility_window
         self.doc_modal_window = doc_modal_window
@@ -90,6 +135,13 @@ class Window(Scene,
         self.hud_window = hud_window
         self.min_size = min_size
         self.max_size = max_size
+
+        # child views
+        self.content_view: Optional[NSObject] = None
+        self.toolbar: Optional[NSObject] = None
+
+        # infered properties
+        self.is_main = False
 
     def body(self):
         return super().body()
@@ -150,3 +202,10 @@ class Window(Scene,
         Modifiable.parse(self)
 
         return self
+
+    def set_content_view(self, content_view: NSObject) -> None:
+        if self.content_view:
+            raise AddingMultipleChildrenToNonStackableViewError()
+        
+        self.content_view = content_view
+        self.window.contentView = content_view
