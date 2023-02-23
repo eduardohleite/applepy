@@ -19,7 +19,7 @@ class Enable:
     def _on_enabled_changed(self, signal, sender, event):
         self.enabled = self.bound_enabled.value
 
-    def is_enabled(self, enabled: Union[str, AbstractBinding]):
+    def is_enabled(self, enabled: Union[bool, AbstractBinding]):
         def __modifier():
             if isinstance(enabled, AbstractBinding):
                 self.bound_enabled = enabled

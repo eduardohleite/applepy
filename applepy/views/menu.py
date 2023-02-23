@@ -4,6 +4,7 @@ from .. import View, StackedView, Image
 from ..backend.app_kit import NSMenu, NSMenuItem, NSApp, NSStatusBar, NSImage, NSSize
 from ..base.app import get_current_app, StatusBarApp
 from ..base.binding import Binding
+from ..base.transform_mixins import Enable
 
 
 class MenuView(StackedView):
@@ -15,6 +16,7 @@ class MenuView(StackedView):
 
     def parse(self):
         self._main_menu = NSMenu.alloc().init()
+        self._main_menu.autoenablesItems = False
         return super().parse()
 
 
@@ -59,13 +61,14 @@ class Menu(StackedView):
             .alloc() \
             .initWithTitle(self.title)
 
+        self._main_menu_item_menu.autoenablesItems = False
         self._main_menu_item.submenu = self._main_menu_item_menu
         self._parent_menu._main_menu.addItem(self._main_menu_item)
 
         super().parse()
 
 
-class MenuItem(View):
+class MenuItem(View, Enable):
     @property
     def title(self):
         return self._title
@@ -80,12 +83,13 @@ class MenuItem(View):
     def __init__(self, *, title: Union[str, Binding],
                           action: Optional[Callable] = None,
                           key_equivalent: str = '') -> None:
-        super().__init__()
+        View.__init__(self)
+        Enable.__init__(self)
 
         self._parent_menu = get_current_app().get()
         self._menu_item = None
 
-        if type(self._parent_menu) != Menu:
+        if not (isinstance(self._parent_menu, Menu) or isinstance(self._parent_menu, MenuView)):
             raise Exception('MenuItem should be a child of Menu.')
         
         if isinstance(title, Binding):
@@ -105,18 +109,28 @@ class MenuItem(View):
         return self._menu_item
 
     def parse(self):
-        self._menu_item = self._parent_menu \
-                              ._main_menu_item_menu \
-                              .addItemWithTitle_action_keyEquivalent_(
-                                  self.title,
-                                  None,
-                                  self.key_equivalent
-                              )
+        if isinstance(self._parent_menu, Menu):
+            self._menu_item = self._parent_menu \
+                                  ._main_menu_item_menu \
+                                  .addItemWithTitle_action_keyEquivalent_(
+                                      self.title,
+                                      None,
+                                      self.key_equivalent
+                                  )
+        else:
+            self._menu_item = NSMenuItem \
+                                .alloc() \
+                                .initWithTitle_action_keyEquivalent_(self.title,
+                                                                     None,
+                                                                     self.key_equivalent)
+            self._parent_menu.ns_object.addItem(self._menu_item)
         
         if self.action:
             self._menu_item.setAction_(
                 get_current_app().register_action(self._menu_item, self.action) 
             )
+
+        return View.parse(self)
 
 
 class StatusIcon(View):
