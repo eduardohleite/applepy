@@ -1,16 +1,22 @@
+from typing import Callable, Optional, Union
+
 from .. import Scene, Size, Point
+from ..base.binding import AbstractBinding, bindable
 from ..base.mixins import Modifiable
 from ..base.transform_mixins import (
     BackgroundColor,
     AlphaValue,
     HasShadow,
-    TitledControl
+    TitledControl,
+    Visible
 )
 from ..backend.app_kit import (
+    NSObject,
     NSWindow,
     NSWindowStyleMask,
     NSBackingStoreType,
-    NSRect, NSPoint, NSSize
+    NSRect, NSPoint, NSSize,
+    objc_method
 )
 
 
@@ -19,10 +25,20 @@ class Window(Scene,
              BackgroundColor,
              AlphaValue,
              HasShadow,
-             TitledControl):
+             TitledControl,
+             Visible):
+
+    @bindable(Size)
+    def size(self) -> Size:
+        return self._size
+
+    @size.setter
+    def size(self, val: Size):
+        self._size = val
+
     def __init__(self,
                  *,
-                 title: str,
+                 title: Union[AbstractBinding, str],
                  size: Size,
                  position: Point = Point(0, 0),
                  borderless: bool = False,
@@ -35,14 +51,31 @@ class Window(Scene,
                  utility_window: bool = False,
                  doc_modal_window: bool = False,
                  non_activating_panel: bool = False,
-                 hud_window: bool = False) -> None:
+                 hud_window: bool = False,
+                 min_size: Optional[Size] = None,
+                 max_size: Optional[Size] = None,
+                 on_close: Optional[Callable] = None) -> None:
 
         Scene.__init__(self)
         Modifiable.__init__(self)
         BackgroundColor.__init__(self)
         TitledControl.__init__(self, title)
 
-        self.size = size
+        class _Delegate(NSObject):
+            @objc_method
+            def windowWillClose_(_self, sender):
+                if on_close and callable(on_close):
+                    on_close()
+
+            @objc_method
+            def windowDidEndLiveResize_(_self, notification):
+                w = self.window
+                pass
+
+
+        self._controller = _Delegate.alloc().init()
+
+        self._size = size
         self.position = position
         self.borderless = borderless
         self.titled = titled
@@ -55,6 +88,8 @@ class Window(Scene,
         self.doc_modal_window = doc_modal_window
         self.non_activating_panel = non_activating_panel
         self.hud_window = hud_window
+        self.min_size = min_size
+        self.max_size = max_size
 
     def body(self):
         return super().body()
@@ -103,8 +138,13 @@ class Window(Scene,
             False
         )
 
+        self.window.delegate = self._controller
         self.window.orderFrontRegardless()
         self.window.title = self.title
+        if self.min_size:
+            self.window.minSize = NSSize(self.min_size.width, self.min_size.height)
+        if self.max_size:
+            self.window.maxSize = NSSize(self.max_size.width, self.max_size.height)
 
         Scene.parse(self)
         Modifiable.parse(self)
