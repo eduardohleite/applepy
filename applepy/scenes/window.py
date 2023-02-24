@@ -4,7 +4,9 @@ from .. import Scene, Size, Point
 from ..base.binding import AbstractBinding, bindable
 from ..base.mixins import Modifiable
 from ..base.utils import try_call
-from ..base.errors import AddingMultipleChildrenToNonStackableViewError
+from ..base.errors import (
+    AddingMultipleChildrenToNonStackableViewError
+)
 from ..base.transform_mixins import (
     BackgroundColor,
     AlphaValue,
@@ -29,9 +31,17 @@ class Window(Scene,
              HasShadow,
              TitledControl,
              Visible):
+    """ Display a MacOS Window. """
 
     @bindable(Size)
     def size(self) -> Size:
+        """
+        Window content dimensions.
+        Data Binding: This property is a read-only bind. Setting this value will have no effect.
+
+        Returns:
+            Size: the dimensions of the window's content area.
+        """
         return self._size
 
     @size.setter
@@ -40,6 +50,13 @@ class Window(Scene,
 
     @bindable(Point)
     def position(self) -> Point:
+        """
+        Window position (origin).
+        Data Binding: This property is a read-only bind. Setting this value will have no effect.
+
+        Returns:
+            Point: the position (origin) of the window.
+        """
         return self._position
 
     @position.setter
@@ -48,6 +65,13 @@ class Window(Scene,
 
     @bindable(bool)
     def full_screen(self) -> bool:
+        """
+        Gets whether window is in full-screen mode.
+        Data Binding: This property is a read-only bind. Setting this value will have no effect.
+
+        Returns:
+            bool: `True` if window is in full-screen mode, `False` otherwise.
+        """
         return self._full_screen
 
     @full_screen.setter
@@ -78,7 +102,55 @@ class Window(Scene,
                  on_full_screen_changed: Optional[Callable] = None,
                  on_minimized: Optional[Callable] = None) -> None:
 
-        Scene.__init__(self)
+        """
+        Add a new `Window` scene, which generates a native MacOS window.
+        Windows, as scenes, can only be a top level item in the App's body method, they cannot be a stacked or child of a view.
+        The first `Window` instance added to the application will be set as the main window for the application, but for it to be effective,
+        return the window object at the end of the body method.
+        Use it in a `with` statement in order to add children to it. Example:
+
+        >>> with Window() as w:
+                Label(text='hello world')
+                return w
+
+        If you need more than one widget in the same window, use layout widgets such as the `StackView`:
+
+        >>> with Window() as w:
+                with VerticalStack():
+                    Label(text='I am at the top')
+                    Label(text='I am at the bottom')
+                return w
+
+        A window can also receive modifiers. For instance, to bind the `visible` property to an external bindable, use:
+
+        >>> with Window() as w:
+                return w.is_visible(Binding(MyApp.show_main_window, self))
+
+        Args:
+            title (Union[AbstractBinding, str]): The window's title. This parameter accepts binding. Binding can also be set later with the `set_title` modifier.
+            size (Size): The window's initial content size.
+            position (Point, optional): The window's initial position (origin). Defaults to Point(0, 0).
+            borderless (bool, optional): Whether the window should be borderless. Defaults to False.
+            titled (bool, optional): Whether the window should display the title bar. Defaults to True.
+            closable (bool, optional): Whether the window should be closable. Defaults to True.
+            resizable (bool, optional): Whether the window should be resizable. Defaults to True.
+            miniaturizable (bool, optional): Whether the window should be minimizable. Defaults to True.
+            full_screen (bool, optional): Whether the window should be open in full-screen mode. Defaults to False.
+            full_size_content_view (bool, optional): Whether the window should have a full sized content view. Defaults to False.
+            utility_window (bool, optional): Whether the window should be displayed as a utility window. Defaults to False.
+            doc_modal_window (bool, optional): Whether the window is a document-modal panel. Defaults to False.
+            non_activating_panel (bool, optional): Whether the window is a `Panel` that does not activate the owning app. Defaults to False.
+            hud_window (bool, optional): Whether the window should be a HUD panel. Defaults to False.
+            min_size (Optional[Size], optional): The window's minimum size. Defaults to None.
+            max_size (Optional[Size], optional): The window's maximum size. Defaults to None.
+            on_close (Optional[Callable], optional): Action to be executed when the window closes. Defaults to None.
+            on_resized (Optional[Callable], optional): Action to be executed when the window is resized. Defaults to None.
+            on_moved (Optional[Callable], optional): Action to be executed when the window is moved. Defaults to None.
+            on_full_screen_changed (Optional[Callable], optional): Action to be executed when the window enters or exits full-screen mode. Defaults to None.
+            on_minimized (Optional[Callable], optional): Action to be executed when the window is minimized. Defaults to None.
+        """
+        
+        Scene.__init__(self, (type(None), Window))
         Modifiable.__init__(self)
         BackgroundColor.__init__(self)
         TitledControl.__init__(self, title)
@@ -143,13 +215,35 @@ class Window(Scene,
         # infered properties
         self.is_main = False
 
-    def body(self):
+    def body(self) -> Scene:
+        """
+        Window's body method.
+        It can be overriden in the View code.
+        It is used internally for rendering the components, do not call it directly.
+
+        Returns:
+            Window: self
+        """
         return super().body()
 
-    def get_ns_object(self):
+    def get_ns_object(self) -> NSObject:
+        """
+        Window's NSObject instance.
+        Do not call it directly, use the ns_object property instead.
+
+        Returns:
+            NSObject: window's NSObject instance.
+        """
         return self.window
 
-    def parse(self):
+    def parse(self) -> Scene:
+        """
+        Window's parse method.
+        It is used internally for rendering the components. Do not call it directly.
+
+        Returns:
+            Window: self
+        """
         style_mask = 0
 
         if self.borderless:
@@ -204,6 +298,17 @@ class Window(Scene,
         return self
 
     def set_content_view(self, content_view: NSObject) -> None:
+        """
+        Sets the window's content view.
+        A window is not a stacked view, so it can only have one content view.
+        It is used internally for rendering the components, do not call it directly.
+
+        Args:
+            content_view (NSObject): The content view to be added to the window.
+
+        Raises:
+            AddingMultipleChildrenToNonStackableViewError: Window already has a content view.
+        """
         if self.content_view:
             raise AddingMultipleChildrenToNonStackableViewError()
         

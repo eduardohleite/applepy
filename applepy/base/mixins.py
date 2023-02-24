@@ -1,25 +1,7 @@
-from typing import List, Callable
+from typing import Optional, Tuple, List, Callable
 
-
-
-class StackMixin:
-    def __init__(self) -> None:
-        self._stack: list = []
-
-    def stack(self, child) -> None:
-        self._stack.append(child)
-
-    def pop(self):
-        return self._stack.pop()
-
-    def pop_first(self):
-        return self._stack.pop(0)
-
-    def get(self):
-        return self._stack[-1]
-
-    def is_stacked(self, ptr):
-        return ptr in self._stack
+from .errors import UnsuportedParentError
+from .app import get_current_app, StackMixin
 
 
 class Modifiable:
@@ -29,3 +11,12 @@ class Modifiable:
     def parse(self):
         for modifier in self._modifiers:
             modifier()
+
+
+class ChildMixin:
+    def __init__(self, valid_parent_types: Optional[Tuple[type]]=None) -> None:
+        self.parent = get_current_app().get()
+        
+        if valid_parent_types:
+            if not isinstance(self.parent, valid_parent_types):
+                raise UnsuportedParentError(type(self), type(self.parent))

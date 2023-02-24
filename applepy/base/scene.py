@@ -1,12 +1,16 @@
 from abc import ABC, abstractmethod
-from typing import Union
+from typing import Optional, Union, Tuple
 
 from .view import View
-from .mixins import StackMixin
+from .mixins import StackMixin, ChildMixin
 from .app import get_current_app
 
 
-class Scene(ABC, StackMixin):
+class Scene(ABC, StackMixin, ChildMixin):
+    def __init__(self, valid_parent_types: Optional[Tuple[type]]=None) -> None:
+        StackMixin.__init__(self)
+        ChildMixin.__init__(self, valid_parent_types)
+
     @abstractmethod
     def body(self):
         return self

@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 from typing import Callable, Optional, Union
 
 from .utils import try_call
-from .mixins import StackMixin
 from ..backend.app_kit import (
     NSObject,
     NSApp,
@@ -10,12 +9,31 @@ from ..backend.app_kit import (
     NSButton,
     NSStatusBar,
     objc_method,
-    objc_classmethod,
     SEL
 )
 
 
 _current_app = None
+
+
+class StackMixin:
+    def __init__(self) -> None:
+        self._stack: list = []
+
+    def stack(self, child) -> None:
+        self._stack.append(child)
+
+    def pop(self):
+        return self._stack.pop()
+
+    def pop_first(self):
+        return self._stack.pop(0)
+
+    def get(self):
+        return self._stack[-1] if len(self._stack) > 0 else None
+
+    def is_stacked(self, ptr):
+        return ptr in self._stack
 
 
 class ApplicationController(NSObject):
