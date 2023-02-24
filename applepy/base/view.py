@@ -114,8 +114,8 @@ class View(ABC, Modifiable, ChildMixin):
 
 
 class StackedView(View, StackMixin):
-    def __init__(self) -> None:
-        View.__init__(self)
+    def __init__(self, valid_parent_types: Optional[Tuple[type]]=None) -> None:
+        View.__init__(self, valid_parent_types)
         StackMixin.__init__(self)
 
     def parse(self):

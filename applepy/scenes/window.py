@@ -257,13 +257,13 @@ class Window(Scene,
         """
         return super().body()
 
-    def get_ns_object(self) -> NSObject:
+    def get_ns_object(self) -> NSWindow:
         """
-        Window's NSObject instance.
+        Window's NSWindow instance.
         Do not call it directly, use the ns_object property instead.
 
         Returns:
-            NSObject: window's NSObject instance.
+            NSWindow: window's NSWindow instance.
         """
         return self.window
 
