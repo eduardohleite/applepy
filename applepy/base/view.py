@@ -1,14 +1,14 @@
 from abc import ABC, abstractmethod
-from typing import Callable, List, Optional, Union
+from typing import Callable, List, Optional, Union, Tuple
 
-from ..base.binding import AbstractBinding
 from .app import get_current_app
-from .mixins import StackMixin, Modifiable
+from .mixins import StackMixin, Modifiable, ChildMixin
+from ..base.binding import AbstractBinding
 from ..backend.app_kit import NSView, NSLayoutConstraint
 from ..base.types import Padding
 
 
-class View(ABC, Modifiable):
+class View(ABC, Modifiable, ChildMixin):
     @property
     def tooltip(self) -> Optional[str]:
         return self._tooltip
@@ -40,7 +40,7 @@ class View(ABC, Modifiable):
             if self._activated_constraints:
                 NSLayoutConstraint.deactivateConstraints_(self._activated_constraints)
 
-    def __init__(self) -> None:
+    def __init__(self, valid_parent_types: Optional[Tuple[type]]=None) -> None:
         self.parent = get_current_app().get()
         self._modifiers: List[Callable] = []
 
@@ -48,14 +48,17 @@ class View(ABC, Modifiable):
         self._grab_constraint = None
         self._activated_constraints = None
 
+        if not valid_parent_types:
+            from ..base.scene import Scene
+            valid_parent_types = (View, StackedView, Scene)
+
         Modifiable.__init__(self)
+        ChildMixin.__init__(self, valid_parent_types)
 
         # register itself in parent's stack
         # TODO: is there a better way to not stack a view with a custom body?
         content = self.body()
-        if self.parent.is_stacked(content):
-            print('double stack')
-        else:
+        if not self.parent.is_stacked(content):
             self.parent.stack(content)
 
     def body(self):

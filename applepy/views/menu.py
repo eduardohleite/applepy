@@ -2,6 +2,7 @@ from typing import Callable, Optional, Union
 
 from .. import View, StackedView, Image
 from ..backend.app_kit import NSMenu, NSMenuItem, NSApp, NSStatusBar, NSImage, NSSize
+from ..base.mixins import AttachableMixin
 from ..base.app import get_current_app, StatusBarApp
 from ..base.binding import Binding
 from ..base.transform_mixins import Enable
@@ -17,13 +18,28 @@ class MenuView(StackedView):
     def parse(self):
         self._main_menu = NSMenu.alloc().init()
         self._main_menu.autoenablesItems = False
-        return super().parse()
 
-
-class MainMenu(MenuView):
-    def parse(self):
         super().parse()
-        NSApp.mainMenu = self._main_menu
+
+        return self
+
+
+class MainMenu(StackedView, AttachableMixin):
+    def __init__(self) -> None:
+        StackedView.__init__(self)
+        from ..scenes import Window
+        AttachableMixin.__init__(self, (Window,))
+
+    def get_ns_object(self):
+        return self._main_menu
+
+    def parse(self):
+        self._main_menu = NSMenu.alloc().init()
+        self._main_menu.autoenablesItems = False
+
+        StackedView.parse(self)
+        AttachableMixin.parse(self)
+
         return self
 
 
@@ -34,8 +50,8 @@ class Menu(StackedView):
         super().__init__()
         self._parent_menu = get_current_app().get()
 
-        if not isinstance(self._parent_menu, MenuView):
-            raise Exception('Menu should be a child of MenuView.')
+        # if not isinstance(self._parent_menu, MenuView):
+        #     raise Exception('Menu should be a child of MenuView.')
 
         self.id = id
         self.title = title

@@ -1,9 +1,12 @@
 from typing import Callable, Optional, Union
 
+from applepy.views.menu import MainMenu
+
 from .. import Scene, Size, Point
 from ..base.binding import AbstractBinding, bindable
 from ..base.mixins import Modifiable
-from ..base.utils import try_call
+from ..base.utils import attachable, try_call
+from ..base.view import View
 from ..base.errors import (
     AddingMultipleChildrenToNonStackableViewError
 )
@@ -15,6 +18,7 @@ from ..base.transform_mixins import (
     Visible
 )
 from ..backend.app_kit import (
+    NSApp,
     NSObject,
     NSWindow,
     NSWindowStyleMask,
@@ -77,6 +81,30 @@ class Window(Scene,
     @full_screen.setter
     def full_screen(self, val: bool) -> None:
         self._full_screen = val
+
+    @attachable(MainMenu)
+    def menu(self) -> MainMenu:
+        """
+        A main menu to be displayed if this is the main window.
+        Do not call it directly, instead, add a MainMenu element to the window's stack.
+
+        Returns:
+            MainMenu: The application's main menu when this is the main window.
+        """
+        return self._menu
+
+    @menu.setter
+    def menu(self, val: MainMenu) -> None:
+        self._menu = val
+        NSApp.mainMenu = val._main_menu
+
+    # @attachable(Toolbar)
+    # def toolbar(self) -> Toolbar:
+    #     return self._toolbar
+
+    # @toolbar.setter
+    # def toolbar(self, val: Toolbar) -> None:
+    #     self._toolbar = val
 
     def __init__(self,
                  *,
@@ -210,7 +238,10 @@ class Window(Scene,
 
         # child views
         self.content_view: Optional[NSObject] = None
-        self.toolbar: Optional[NSObject] = None
+
+        # attachables
+        self._menu: Optional[View] = None
+        self._toolbar: Optional[View] = None
 
         # infered properties
         self.is_main = False
