@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Callable, Optional, Union
 
-from .mixins import StackMixin
+from .utils import try_call
 from ..backend.app_kit import (
     NSObject,
     NSApp,
@@ -9,12 +9,31 @@ from ..backend.app_kit import (
     NSButton,
     NSStatusBar,
     objc_method,
-    objc_classmethod,
     SEL
 )
 
 
 _current_app = None
+
+
+class StackMixin:
+    def __init__(self) -> None:
+        self._stack: list = []
+
+    def stack(self, child) -> None:
+        self._stack.append(child)
+
+    def pop(self):
+        return self._stack.pop()
+
+    def pop_first(self):
+        return self._stack.pop(0)
+
+    def get(self):
+        return self._stack[-1] if len(self._stack) > 0 else None
+
+    def is_stacked(self, ptr):
+        return ptr in self._stack
 
 
 class ApplicationController(NSObject):
@@ -37,6 +56,7 @@ class App(ABC, StackMixin):
         self._actions = {}
 
     def _register_scene(self) -> None:
+        self._scene.is_main = True
         self._controller.mainWindow = self._scene.window
         NSApp.activateIgnoringOtherApps_(True)
 
@@ -60,8 +80,7 @@ class App(ABC, StackMixin):
 
     def invoke_action(self, caller: Union[NSMenuItem, NSButton]):
         action = self._actions.get(caller)
-        if action:
-            action()
+        try_call(action)
 
     def quit(self):
         NSApp.terminate_(None)

@@ -91,7 +91,6 @@ class TextField(Control):
 
     def parse(self):
         self._text_field = NSTextField.textFieldWithString_(self.text)
-
         self._text_field.delegate = self._controller
         
         super().parse()

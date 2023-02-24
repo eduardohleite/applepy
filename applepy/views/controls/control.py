@@ -12,8 +12,7 @@ class Control(View, Enable):
         if isinstance(self.parent, StackView):
             self.parent.ns_object.addArrangedSubview_(self.ns_object)
         else:
-            self.parent.ns_object.contentView = self.ns_object
-
+            self.parent.set_content_view(self.ns_object)
         return View.parse(self)
 
     def ignore_multi_click(self, value: bool):
