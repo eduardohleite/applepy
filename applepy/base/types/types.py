@@ -1,10 +1,10 @@
-from typing import NamedTuple
 from dataclasses import dataclass
 
 from ..binding import BindableMixin
 
 
-class Padding(NamedTuple):
+@dataclass
+class Padding(BindableMixin):
     bottom: float
     left: float
     right: float

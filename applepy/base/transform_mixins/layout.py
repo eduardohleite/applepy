@@ -3,9 +3,10 @@ from rubicon.objc.types import NSEdgeInsets
 
 from ... import AbstractBinding, Padding, Alignment
 from ..binding import bindable
+from .base import TransformMixin
 
 
-class LayoutSpacing:
+class LayoutSpacing(TransformMixin):
     @bindable(float)
     def spacing(self) -> float:
         return self._spacing
@@ -13,7 +14,7 @@ class LayoutSpacing:
     @spacing.setter
     def spacing(self, val: float) -> None:
         self._spacing = val
-        self.__set()
+        LayoutSpacing._set(self)
 
     def __init__(self, default_spacing: float=10.) -> None:
         self._spacing = default_spacing
@@ -21,12 +22,8 @@ class LayoutSpacing:
     def _on_spacing_changed(self, signal, sender, event):
         self._spacing = self.bound_spacing.value
 
-    def __set(self) -> None:
+    def _set(self) -> None:
         self.ns_object.spacing = self.spacing
-
-    def parse(self):
-        self.__set()
-        return self
 
     def set_spacing(self, spacing: Union[float, AbstractBinding]):
         def __modifier():
@@ -42,7 +39,7 @@ class LayoutSpacing:
         return self
 
 
-class LayoutPadding:
+class LayoutPadding(TransformMixin):
     @bindable(Padding)
     def padding(self) -> Padding:
         return self._padding
@@ -50,7 +47,7 @@ class LayoutPadding:
     @padding.setter
     def padding(self, val: Padding) -> None:
         self._padding = val
-        self.__set()
+        LayoutPadding._set(self)
 
     def __init__(self, default_padding: Padding=Padding(0., 0., 0., 0.)) -> None:
         self._padding = default_padding
@@ -58,15 +55,11 @@ class LayoutPadding:
     def _on_padding_changed(self, signal, sender, event):
         self._padding = self.bound_padding.value
 
-    def __set(self) -> None:
+    def _set(self) -> None:
         self.ns_object.edgeInsets = NSEdgeInsets(self.padding.bottom,
                                                  self.padding.left,
                                                  self.padding.right,
                                                  self.padding.top)
-
-    def parse(self):
-        self.__set()
-        return self
 
     def set_padding(self, padding: Optional[Union[Padding, AbstractBinding]]=Padding(10., 10., 10., 10.)):
         def __modifier():
@@ -82,7 +75,7 @@ class LayoutPadding:
         return self
 
 
-class LayoutAlignment:
+class LayoutAlignment(TransformMixin):
     @bindable(Alignment)
     def alignment(self) -> Alignment:
         return self._alignment
@@ -90,7 +83,7 @@ class LayoutAlignment:
     @alignment.setter
     def alignment(self, val: Alignment) -> None:
         self._alignment = val
-        self.__set()
+        LayoutAlignment._set(self)
 
     def __init__(self, default_alignment: Alignment=Alignment.left) -> None:
         self._alignment = default_alignment
@@ -98,12 +91,8 @@ class LayoutAlignment:
     def _on_alignment_changed(self, signal, sender, event):
         self._alignment = self.bound_alignment.value
 
-    def __set(self) -> None:
+    def _set(self) -> None:
         self.ns_object.alignment = self.alignment
-
-    def parse(self):
-        self.__set()
-        return self
 
     def set_alignment(self, alignment: Union[Alignment, AbstractBinding]):
         def __modifier():
