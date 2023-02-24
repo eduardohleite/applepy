@@ -2,7 +2,7 @@ from typing import Callable, Optional, Union
 
 from .. import View, StackedView, Image
 from ..backend.app_kit import NSMenu, NSMenuItem, NSApp, NSStatusBar, NSImage, NSSize
-from ..base.mixins import AttachableMixin
+from ..base.mixins import AttachableMixin, ChildMixin
 from ..base.app import get_current_app, StatusBarApp
 from ..base.binding import Binding
 from ..base.transform_mixins import Enable
@@ -43,15 +43,12 @@ class MainMenu(StackedView, AttachableMixin):
         return self
 
 
-class Menu(StackedView):
+class Menu(StackedView, ChildMixin):
     def __init__(self, *, title: str,
                           action: Optional[Callable] = None,
                           key_equivalent: str = '') -> None:
-        super().__init__()
-        self._parent_menu = get_current_app().get()
-
-        # if not isinstance(self._parent_menu, MenuView):
-        #     raise Exception('Menu should be a child of MenuView.')
+        StackedView.__init__(self)
+        ChildMixin.__init__(self, (MenuView, MainMenu))
 
         self.id = id
         self.title = title
@@ -79,12 +76,12 @@ class Menu(StackedView):
 
         self._main_menu_item_menu.autoenablesItems = False
         self._main_menu_item.submenu = self._main_menu_item_menu
-        self._parent_menu._main_menu.addItem(self._main_menu_item)
+        self.parent._main_menu.addItem(self._main_menu_item)
 
         super().parse()
 
 
-class MenuItem(View, Enable):
+class MenuItem(View, ChildMixin, Enable):
     @property
     def title(self):
         return self._title
@@ -101,12 +98,9 @@ class MenuItem(View, Enable):
                           key_equivalent: str = '') -> None:
         View.__init__(self)
         Enable.__init__(self)
+        ChildMixin.__init__(self, (Menu, MainMenu, MenuView))
 
-        self._parent_menu = get_current_app().get()
         self._menu_item = None
-
-        if not (isinstance(self._parent_menu, Menu) or isinstance(self._parent_menu, MenuView)):
-            raise Exception('MenuItem should be a child of Menu.')
         
         if isinstance(title, Binding):
             self.bound_title = title
@@ -125,8 +119,8 @@ class MenuItem(View, Enable):
         return self._menu_item
 
     def parse(self):
-        if isinstance(self._parent_menu, Menu):
-            self._menu_item = self._parent_menu \
+        if isinstance(self.parent, Menu):
+            self._menu_item = self.parent \
                                   ._main_menu_item_menu \
                                   .addItemWithTitle_action_keyEquivalent_(
                                       self.title,
@@ -139,7 +133,7 @@ class MenuItem(View, Enable):
                                 .initWithTitle_action_keyEquivalent_(self.title,
                                                                      None,
                                                                      self.key_equivalent)
-            self._parent_menu.ns_object.addItem(self._menu_item)
+            self.parent.ns_object.addItem(self._menu_item)
         
         if self.action:
             self._menu_item.setAction_(
