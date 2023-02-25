@@ -6,6 +6,6 @@ class TransformMixin(ABC):
     def _set(self) -> None:
         pass
 
-    def parse(self):
-        self._set()
+    def parse(self, As_: type):
+        As_._set(self)
         return self

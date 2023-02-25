@@ -38,9 +38,9 @@ class Button(Control,
             )
 
         Control.parse(self)
-        TitledControl.parse(self)
-        BezelColor.parse(self)
-        KeyBindable.parse(self)
+        TitledControl.parse(self, TitledControl)
+        BezelColor.parse(self, BezelColor)
+        KeyBindable.parse(self, KeyBindable)
 
         return self
 
@@ -64,6 +64,6 @@ class Checkbox(Button,
         )
 
         Control.parse(self)
-        ControlWithState.parse(self)
+        ControlWithState.parse(self, ControlWithState)
 
         return self

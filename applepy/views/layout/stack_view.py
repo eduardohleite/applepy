@@ -118,8 +118,8 @@ class StackView(StackedView,
             self.parent.set_content_view(self.ns_object)
 
         StackedView.parse(self)
-        LayoutAlignment.parse(self)
-        LayoutSpacing.parse(self)
+        LayoutAlignment.parse(self, LayoutAlignment)
+        LayoutSpacing.parse(self, LayoutSpacing)
         Modifiable.parse(self)
     
         return self
