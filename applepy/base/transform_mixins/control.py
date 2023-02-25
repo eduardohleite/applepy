@@ -88,7 +88,7 @@ class BezelColor(TransformMixin):
         self.bezel_color = self.bound_bezel_color.value
 
     def _set(self) -> None:
-        self.ns_object.bezelColor = self.bezel_color
+        self.ns_object.bezelColor = self.bezel_color.value
 
     def set_bezel_color(self, bezel_color: Union[Color, AbstractBinding]):
         def __modifier():
