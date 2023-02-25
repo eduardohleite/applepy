@@ -17,8 +17,16 @@
 - [ ] RadioButton
 - [ ] RadioButtonGroup
 - [ ] DecoratedView
+- [ ] Combobox
 
 ### Features
+- [ ] Submenu action
+- [ ] Attach Menu to StatusIcon
 - [ ] Alert
 - [ ] Dialog
+- [ ] List binding
 - [ ] iOS/UI Kit backend
+- [ ] Examples
+- [ ] Standalone documentation generation
+- [ ] pip packaging
+- [ ] pip publishing

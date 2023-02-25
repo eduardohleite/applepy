@@ -177,7 +177,6 @@ class Window(Scene,
             on_full_screen_changed (Optional[Callable], optional): Action to be executed when the window enters or exits full-screen mode. Defaults to None.
             on_minimized (Optional[Callable], optional): Action to be executed when the window is minimized. Defaults to None.
         """
-        
         Scene.__init__(self, (type(None), Window))
         Modifiable.__init__(self)
         BackgroundColor.__init__(self)
@@ -215,6 +214,7 @@ class Window(Scene,
             def windowDidMiniaturize_(self, notification):
                 try_call(on_minimized)
 
+        self.window = None
         self._controller = _WindowDelegate.alloc().init()
 
         # bindables

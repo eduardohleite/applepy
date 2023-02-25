@@ -15,14 +15,20 @@ class TitledControl(TransformMixin):
         self._title = val
         TitledControl._set(self)
 
-    def __init__(self, default_title: str='') -> None:
-        self._title = default_title
+    def __init__(self, default_title: Union[str, AbstractBinding]='') -> None:
+        if isinstance(default_title, AbstractBinding):
+            self.bound_title = default_title
+            self.bound_title.on_changed.connect(self._on_title_changed)
+            self._title = default_title.value
+        else:
+            self._title = default_title
 
     def _on_title_changed(self, signal, sender, event):
         self.title = self.bound_title.value
 
     def _set(self) -> None:
-        self.ns_object.title = self.title
+        if self.ns_object:
+            self.ns_object.title = self.title
 
     def set_title(self, title: Union[str, AbstractBinding]):
         def __modifier():

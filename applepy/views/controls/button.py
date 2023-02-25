@@ -51,7 +51,7 @@ class Button(Control,
         Do not call it directly, use the ns_object property instead.
 
         Returns:
-            NSButton: the syack view's NSButton instance.
+            NSButton: the button's NSButton instance.
         """
         return self._button
 

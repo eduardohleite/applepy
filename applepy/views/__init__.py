@@ -1,7 +1,7 @@
 from .menu import (
-    MenuView,
-    MainMenu,
     Menu,
+    MainMenu,
+    Submenu,
     MenuItem,
     StatusIcon
 )
