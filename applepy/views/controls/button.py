@@ -1,14 +1,17 @@
-from typing import Callable, Optional
+from typing import Callable, Optional, Union
 
 from ...base.transform_mixins import (
     TitledControl,
     BezelColor,
     ControlWithState,
-    KeyBindable
+    KeyBindable,
+    ImageControl
 )
 from ...backend.app_kit import NSButton
+from ...base.binding import AbstractBinding
 from ...base.app import get_current_app
 from ...base.utils import try_call
+from ...base.types import Image, ImagePosition
 from .control import Control
 
 
@@ -19,7 +22,7 @@ class Button(Control,
 
     """ Control that generates a native MacOS PushButton. """
 
-    def __init__(self, *, title: str,
+    def __init__(self, *, title: Union[str, AbstractBinding],
                           action: Optional[Callable]=None,
                           key_equivalent: Optional[str]=None) -> None:
         """
@@ -83,7 +86,8 @@ class Checkbox(Button,
 
     """ Control that generates a native MacOS check box style button. """
 
-    def __init__(self, *, title: str, action: Optional[Callable] = None) -> None:
+    def __init__(self, *, title: Union[str, AbstractBinding],
+                          action: Optional[Callable] = None) -> None:
         """
         Add a new `Checkbox` view, which creates a MacOS native checkbox style button.
 
@@ -127,5 +131,52 @@ class Checkbox(Button,
 
         Control.parse(self)
         ControlWithState.parse(self, ControlWithState)
+
+        return self
+
+
+class ImageButton(Button,
+                  ImageControl):
+
+    """ Control that generates a native MacOS PushButton with an image """
+
+    def __init__(self, *, title: Union[str, AbstractBinding],
+                          image: Union[Image, AbstractBinding],
+                          image_position: Union[ImagePosition, AbstractBinding]=ImagePosition.image_left,
+                          action: Optional[Callable]=None,
+                          key_equivalent: Optional[str]=None) -> None:
+        """
+        Add a new `Button` view, which creates a MacOS native Push Button with an image.
+        The following example will show a button with an icon on the left and the text 'Ok' on the right:
+        >>> ImageButton(title='Ok', image=Image.from_system('NSMenuOnStateTemplate'))
+
+        The next example will show the image only:
+        >>> ImageButton(title='', image=Image.from_system('NSMenuOnStateTemplate'), image_position=ImagePosition=image_only)
+
+        The last example will show the image on the right and the text on the left:
+        >>> ImageButton(title='Cool button',
+                        image=Image.from_system('NSUserAccounts'),
+                        image_position=ImagePosition.image_right)
+
+        Args:
+            title (Union[str, AbstractBinding]): The button's title.
+            image (Union[Image, AbstractBinding]): The button's image.
+            image_position (Union[ImagePosition, AbstractBinding], optional): The position of the button's image. Defaults to ImagePosition.image_left.
+            action (Optional[Callable], optional): The action to be executed when the button is clicked. Defaults to None.
+            key_equivalent (Optional[str], optional): The button's key shortcut. Defaults to None.
+        """    
+        Button.__init__(self, title=title, action=action, key_equivalent=key_equivalent)
+        ImageControl.__init__(self, image=image, image_position=image_position)
+
+    def parse(self) -> Button:
+        """
+        View's parse method.
+        It is used internally for rendering the components. Do not call it directly.
+
+        Returns:
+            ImageButton: self
+        """
+        Button.parse(self)
+        ImageControl.parse(self, ImageControl)
 
         return self

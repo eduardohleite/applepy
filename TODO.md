@@ -11,7 +11,7 @@
 ### Components
 - [ ] Spacer
 - [ ] ImageView
-- [ ] ImageButton
+- [x] ImageButton
 - [ ] Toolbar
 - [ ] ToolbarButton
 - [ ] RadioButton
