@@ -21,6 +21,7 @@
 
 ### Features
 - [ ] Submenu action
+- [ ] StatusIcon action
 - [ ] Attach Menu to StatusIcon
 - [ ] Alert
 - [ ] Dialog

@@ -1,7 +1,8 @@
-from typing import Union, Optional
+from typing import Union, Optional, Tuple, Callable
 
-from ...base.types import Color
+from ...base.types import Color, Image, ImagePosition
 from ... import AbstractBinding, bindable
+from ...base.utils import try_call
 from .base import TransformMixin
 
 
@@ -28,7 +29,7 @@ class TitledControl(TransformMixin):
 
     def _set(self) -> None:
         if self.ns_object:
-            self.ns_object.title = self.title
+            self.ns_object.title = self._title
 
     def set_title(self, title: Union[str, AbstractBinding]):
         def __modifier():
@@ -242,6 +243,99 @@ class TextControl(TransformMixin):
                 self.text = text.value
             else:
                 self.text = text
+
+        self._modifiers.append(__modifier)
+
+        return self
+
+
+class ImageControl(TransformMixin):
+    @bindable(Image)
+    def image(self) -> Image:
+        return self._image
+
+    @image.setter
+    def image(self, val: Image) -> None:
+        self._image = val
+        ImageControl._set(self)
+
+    @bindable(ImagePosition)
+    def image_position(self) -> ImagePosition:
+        return self._image_position
+
+    @image_position.setter
+    def image_position(self, image_position: ImagePosition) -> None:
+        self._image_position = image_position
+        ImageControl._set(self)
+
+    def __init__(self, image: Optional[Union[Image, AbstractBinding]]=None,
+                       image_position: Optional[Union[ImagePosition, AbstractBinding]]=None,
+                       default_image_position: ImagePosition=ImagePosition.no_image,
+                       before_set: Optional[Callable]=None) -> None:
+
+        self._default_image_position = default_image_position
+        self._before_set = before_set
+        image, image_position = self.__compute_image_and_position(image, image_position)
+
+        if isinstance(image, AbstractBinding):
+            self.bound_image = image
+            self.bound_image.on_changed.connect(self._on_image_changed)
+            self._image = image.value
+        else:
+            self._image = image
+        
+        if isinstance(image_position, AbstractBinding):
+            self.bound_image_position = image_position
+            self.bound_image_position.on_changed.connect(self._on_image_position_changed)
+            self._image_position = image_position.value
+        else:
+            self._image_position = image_position
+
+    def __compute_image_and_position(self,
+                                     image: Optional[Union[Image, AbstractBinding]],
+                                     image_position: Optional[Union[ImagePosition, AbstractBinding]]) \
+                                        -> Tuple[Optional[Union[Image, AbstractBinding]],
+                                                 Optional[Union[ImagePosition, AbstractBinding]]]:
+        if image:
+            if not image_position:
+                image_position = self._default_image_position
+        else:
+            if image_position:
+                image_position = image_position.no_image
+
+        return image, image_position
+
+
+    def _on_image_changed(self, signal, sender, event):
+        self.image = self.bound_image.value
+
+    def _on_image_position_changed(self, signal, sender, event):
+        self.image_position = self.bound_image_position.value
+
+    def _set(self) -> None:
+        if self.ns_object and self._image:
+            try_call(self._before_set, self._image)
+            self.ns_object.image = self._image.value
+            self.ns_object.imagePosition = self._image_position.value
+
+    def set_image(self, image: Union[Image, AbstractBinding]='',
+                        image_position: Union[ImagePosition, AbstractBinding]=ImagePosition.no_image):
+        def __modifier():
+            image, image_position = self.__compute_image_and_position(image, image_position)
+
+            if isinstance(image, AbstractBinding):
+                self.bound_image = image
+                self.bound_image.on_changed.connect(self._on_image_changed)
+                self.image = image.value
+            else:
+                self.image = image
+        
+            if isinstance(image_position, AbstractBinding):
+                self.bound_image_position = image_position
+                self.bound_image_position.on_changed.connect(self._on_image_position_changed)
+                self.image_position = image_position.value
+            else:
+                self.image_position = image_position
 
         self._modifiers.append(__modifier)
 

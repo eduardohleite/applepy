@@ -8,5 +8,6 @@ from .control import(
     KeyBindable,
     Placeholder,
     TextColor,
-    TextControl
+    TextControl,
+    ImageControl
 )

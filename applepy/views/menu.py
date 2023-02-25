@@ -1,14 +1,15 @@
 from typing import Callable, Optional, Union
 
-from .. import View, StackedView, Image
+from .. import View, StackedView, Image, ImagePosition
 from ..backend.app_kit import NSMenu, NSMenuItem, NSSize
-from ..base.mixins import AttachableMixin, ChildMixin
+from ..base.mixins import AttachableMixin
 from ..base.app import get_current_app, StatusBarApp
-from ..base.binding import AbstractBinding
-from ..base.transform_mixins import Enable, TitledControl, KeyBindable
+from ..base.utils import attachable
+from ..base.binding import AbstractBinding, bindable
+from ..base.transform_mixins import Enable, TitledControl, KeyBindable, ImageControl
 
 
-class Menu(StackedView):
+class Menu(StackedView, AttachableMixin):
     """
     Control that generates a native MacOS generic Menu that can be attached to other views.
     """    
@@ -26,7 +27,8 @@ class Menu(StackedView):
                 with Menu():
                     Submenu(title='Close')
         """
-        super().__init__()
+        StackedView.__init__(self)
+        AttachableMixin.__init__(self, (StatusIcon,))
 
     def get_ns_object(self) -> NSMenu:
         """
@@ -49,7 +51,8 @@ class Menu(StackedView):
         self._main_menu = NSMenu.alloc().init()
         self._main_menu.autoenablesItems = False
 
-        super().parse()
+        StackedView.parse(self)
+        AttachableMixin.parse(self)
 
         return self
 
@@ -269,55 +272,55 @@ class MenuItem(View,
         return self
 
 
-class StatusIcon(View):
-    @property
-    def image(self) -> Image:
-        return self._image
+class StatusIcon(StackedView,
+                 ImageControl,
+                 TitledControl):
+    @bindable(bool)
+    def is_template(self) -> bool:
+        return self._is_template
 
-    @image.setter
-    def image(self, val: Image) -> None:
-        self._image = val
-        self.ns_object.image = val.value
+    @is_template.setter
+    def is_template(self, val: bool) -> None:
+        self._is_template = val
 
-    @property
-    def menu_view(self) -> Menu:
-        return self._menu_view
+    @attachable(Menu)
+    def menu(self) -> Menu:
+        return self._menu
 
-    @menu_view.setter
-    def menu_view(self, val: Menu) -> None:
-        self._menu_view = val
-        get_current_app().status_bar_icon.menu = self.menu_view.ns_object if self.menu_view else None
+    @menu.setter
+    def menu(self, val: Menu) -> None:
+        self._menu = val
+        get_current_app().status_bar_icon.menu = self.menu.ns_object if self.menu else None
 
-    def __init__(self) -> None:
+    def __init__(self, image: Optional[Union[Image, AbstractBinding]]=None,
+                       image_position: Optional[Union[ImagePosition, AbstractBinding]]=None,
+                       is_template: bool=True) -> None:
         if not isinstance(get_current_app(), StatusBarApp):
             raise Exception('StatusIcon can only be used in a StatusBarApp')
 
         self._image = None
-        self._menu_view = None
+        self._menu = None
+        self.is_template = is_template
 
-        super().__init__()
+        StackedView.__init__(self)
+        TitledControl.__init__(self)
+        ImageControl.__init__(self,
+                              image,
+                              image_position,
+                              ImagePosition.image_only,
+                              self._before_set_image)
+
+    def _before_set_image(self, image: Image):
+        size = get_current_app().status_bar_icon.statusBar.thickness * 0.8
+        image.value.size = NSSize(size, size)
+        image.value.template = self.is_template
+        self._image = image
 
     def get_ns_object(self):
         return get_current_app().status_bar_icon.button
 
     def parse(self):
-        super().parse()
-        return self
-
-    def set_image(self, *, image: Image, is_template: bool=True): #TODO binding
-        def __modifier():
-            size = get_current_app().status_bar_icon.statusBar.thickness * 0.8
-            image.value.size = NSSize(size, size)
-            image.value.template = is_template
-            self.image = image
-
-        self._modifiers.append(__modifier)
-
-        return self
-
-    def set_menu(self, *, menu_view: Optional[Menu]=None):
-        def __modifier():
-            self.menu_view = menu_view
-
-        self._modifiers.append(__modifier)
+        StackedView.parse(self)
+        TitledControl.parse(self, TitledControl)
+        ImageControl.parse(self, ImageControl)
         return self

@@ -1,9 +1,9 @@
 from typing import Optional, Callable, Any
 
 
-def try_call(fn: Optional[Callable]) -> Any:
+def try_call(fn: Optional[Callable], *args, **kwargs) -> Any:
     if fn and callable(fn):
-        return fn()
+        return fn(*args, **kwargs)
 
 
 class Attachable(property):
