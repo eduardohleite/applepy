@@ -1,3 +1,5 @@
+from typing import Optional
+
 from ... import StackedView, Alignment, StackOrientation, StackDistribution
 from ...backend.app_kit import NSStackView
 from ...base.binding import bindable
@@ -17,6 +19,7 @@ class StackView(StackedView,
                 LayoutSpacing,
                 LayoutPadding,
                 LayoutAlignment):
+
     """ Layout view horizontally or vertically in a stack. """
 
     @bindable(StackOrientation)
@@ -55,7 +58,7 @@ class StackView(StackedView,
 
     def __init__(self, *, orientation: StackOrientation,
                           alignment: Alignment=Alignment.left,
-                          distribution: StackDistribution=StackDistribution.fill) -> None:
+                          distribution: Optional[StackDistribution]=None) -> None:
         """
         Add a new `StackView` view, which lays out child views in a horizontal or vertical
         stack. Child views can be specified with a `with` statement:
@@ -73,13 +76,16 @@ class StackView(StackedView,
                     Label(text='row 2 column 1')
                     Label(text='row 2 column 2')
 
+        If no distribution is set in the initializer, the first stack, that is added as a content view of a `Scene`
+        is set to `StackDistribution.fill`. All inner stacks are set to `StackDistribution.gravity_areas`.
+
         Unless you plan to choose the stack view's orientation programatically, prefer to
         use the shortcut classes `HorizontalStack` and `VerticalStack`.
 
         Args:
             orientation (StackOrientation): The stack layout orientation.
             alignment (Alignment, optional): The alignment of the stacked views. Defaults to Alignment.left.
-            distribution (StackDistribution, optional): The distribution of the stacked views. Defaults to StackDistribution.fill.
+            distribution (StackDistribution, optional): The distribution of the stacked views.
         """
         StackedView.__init__(self, (Scene, StackedView))
         BackgroundColor.__init__(self)
@@ -88,7 +94,14 @@ class StackView(StackedView,
         LayoutAlignment.__init__(self, default_alignment=alignment)
 
         self._orientation = orientation
-        self._distribution = distribution
+
+        if not distribution:
+            if isinstance(self.parent, Scene):
+                self._distribution = StackDistribution.fill
+            else:
+                self._distribution = StackDistribution.gravity_areas
+        else:
+            self._distribution = distribution
 
     def get_ns_object(self) -> NSStackView:
         """
@@ -96,7 +109,7 @@ class StackView(StackedView,
         Do not call it directly, use the ns_object property instead.
 
         Returns:
-            NSStackView: the syack view's NSStackView instance.
+            NSStackView: the stack view's NSStackView instance.
         """
         return self._stack_view
 
@@ -128,7 +141,7 @@ class StackView(StackedView,
 class HorizontalStack(StackView):
     """ Layout view horizontally in a stack. """
     def __init__(self, *, alignment: Alignment=Alignment.center_y,
-                          distribution: StackDistribution=StackDistribution.fill) -> None:
+                          distribution: Optional[StackDistribution]=None) -> None:
         """
         Shortcut to create a horizontal StackView.
         Child views can be specified with a `with` statement:
@@ -146,6 +159,9 @@ class HorizontalStack(StackView):
                     Label(text='row 2 column 1')
                     Label(text='row 2 column 2')
 
+        If no distribution is set in the initializer, the first stack, that is added as a content view of a `Scene`
+        is set to `StackDistribution.fill`. All inner stacks are set to `StackDistribution.gravity_areas`.
+
         Args:
             alignment (Alignment, optional): The alignment of the stacked views. Defaults to Alignment.center_y.
             distribution (StackDistribution, optional): The distribution of the stacked views. Defaults to StackDistribution.fill.
@@ -158,7 +174,7 @@ class HorizontalStack(StackView):
 class VerticalStack(StackView):
     """ Layout view vertically in a stack. """
     def __init__(self, *, alignment: Alignment=Alignment.center_x,
-                          distribution: StackDistribution=StackDistribution.fill) -> None:
+                          distribution: Optional[StackDistribution]=None) -> None:
         """
         Shortcut to create a vertical StackView.
         Child views can be specified with a `with` statement:
@@ -175,6 +191,9 @@ class VerticalStack(StackView):
                 with HorizontalStack():
                     Label(text='row 2 column 1')
                     Label(text='row 2 column 2')
+
+        If no distribution is set in the initializer, the first stack, that is added as a content view of a `Scene`
+        is set to `StackDistribution.fill`. All inner stacks are set to `StackDistribution.gravity_areas`.
 
         Args:
             alignment (Alignment, optional): The alignment of the stacked views. Defaults to Alignment.center_y.

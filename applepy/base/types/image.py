@@ -1,8 +1,10 @@
+from enum import Enum
+
 from ...backend.app_kit import NSImage
-from ..binding import Bindable
+from ..binding import BindableMixin
 
 
-class Image(Bindable):
+class Image(BindableMixin):
     def __init__(self, image: NSImage) -> None:
         self._image = image
 
@@ -21,3 +23,15 @@ class Image(Bindable):
     @property
     def value(self):
         return self._image
+
+
+class ImagePosition(BindableMixin, Enum):
+    no_image = 0
+    image_only = 1
+    image_leading = 7
+    image_trailing = 8
+    image_left = 2
+    image_right = 3
+    image_below = 4
+    image_above = 5
+    image_overlaps = 6

@@ -89,7 +89,7 @@ class App(ABC, StackMixin):
 class StatusBarApp(App):
     def __init__(self) -> None:
         super().__init__()
-        self.status_bar_icon = NSStatusBar.systemStatusBar.statusItemWithLength_(-2.)
+        self.status_bar_icon = NSStatusBar.systemStatusBar.statusItemWithLength_(-1.)
 
 
 def get_current_app() -> App:

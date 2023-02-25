@@ -9,7 +9,8 @@ from .base.types import (
     Point,
     Alignment,
     StackOrientation,
-    StackDistribution
+    StackDistribution,
+    ImagePosition
 )
 from .base.binding import (
     bindable,
