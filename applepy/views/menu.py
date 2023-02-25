@@ -1,7 +1,7 @@
 from typing import Callable, Optional, Union
 
 from .. import View, StackedView, Image
-from ..backend.app_kit import NSMenu, NSMenuItem, NSApp, NSStatusBar, NSImage, NSSize
+from ..backend.app_kit import NSMenu, NSMenuItem, NSSize
 from ..base.mixins import AttachableMixin, ChildMixin
 from ..base.app import get_current_app, StatusBarApp
 from ..base.binding import Binding
