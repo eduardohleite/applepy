@@ -29,7 +29,6 @@ class Button(Control,
         >>> Button(title='Push me')
 
         An action and a key shortcut can also be set in the initializers:
-
         >>> Button(title='Quit',
                    key_equivalent='q',
                    action=self.quit)
@@ -108,7 +107,7 @@ class Checkbox(Button,
         Button.__init__(self, title=title, action=action)
         ControlWithState.__init__(self)
 
-    def parse(self):
+    def parse(self) -> Button:
         """
         View's parse method.
         It is used internally for rendering the components. Do not call it directly.

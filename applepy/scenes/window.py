@@ -183,7 +183,7 @@ class Window(Scene,
         BackgroundColor.__init__(self)
         TitledControl.__init__(self, title)
 
-        class _Delegate(NSObject):
+        class _WindowDelegate(NSObject):
             @objc_method
             def windowWillClose_(_self, sender):
                 try_call(on_close)
@@ -215,7 +215,7 @@ class Window(Scene,
             def windowDidMiniaturize_(self, notification):
                 try_call(on_minimized)
 
-        self._controller = _Delegate.alloc().init()
+        self._controller = _WindowDelegate.alloc().init()
 
         # bindables
         self._size = size

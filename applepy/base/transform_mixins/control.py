@@ -38,6 +38,39 @@ class TitledControl(TransformMixin):
         return self
 
 
+class Placeholder(TransformMixin):
+    @bindable(str)
+    def placeholder(self) -> str:
+        return self._placeholder
+
+    @placeholder.setter
+    def placeholder(self, val: str) -> None:
+        self._placeholder = val
+        Placeholder._set(self)
+
+    def __init__(self) -> None:
+        self._placeholder = None
+
+    def _on_placeholder_changed(self, signal, sender, event):
+        self.placeholder = self.bound_placeholder.value
+
+    def _set(self) -> None:
+        self.ns_object.placeholderString = self.placeholder
+
+    def set_placeholder(self, placeholder: Union[str, AbstractBinding]):
+        def __modifier():
+            if isinstance(placeholder, AbstractBinding):
+                self.bound_placeholder = placeholder
+                self.bound_placeholder.on_changed.connect(self._on_placeholder_changed)
+                self.placeholder = placeholder.value
+            else:
+                self.placeholder = placeholder
+
+        self._modifiers.append(__modifier)
+
+        return self
+
+
 class ControlWithState(TransformMixin):
     @bindable(int)
     def state(self) -> int:
@@ -131,6 +164,78 @@ class KeyBindable(TransformMixin):
                 self.key_equivalent = key_equivalent.value
             else:
                 self.key_equivalent = key_equivalent
+
+        self._modifiers.append(__modifier)
+
+        return self
+
+
+class TextColor(TransformMixin):
+    @bindable(Color)
+    def text_color(self) -> Color:
+        return self._text_color
+
+    @text_color.setter
+    def text_color(self, val: Color) -> None:
+        self._text_color = val
+        TextColor._set(self)
+
+    def __init__(self) -> None:
+        self._text_color = Color.text_color
+
+    def _on_text_color_changed(self, signal, sender, event):
+        self.text_color = self.bound_text_color.value
+
+    def _set(self) -> None:
+        self.ns_object.textColor = self.text_color.value
+
+    def set_text_color(self, text_color: Union[Color, AbstractBinding]):
+        def __modifier():
+            if isinstance(text_color, AbstractBinding):
+                self.bound_text_color = text_color
+                self.bound_text_color.on_changed.connect(self._on_text_color_changed)
+                self.text_color = text_color.value
+            else:
+                self.text_color = text_color
+
+        self._modifiers.append(__modifier)
+
+        return self
+
+
+class TextControl(TransformMixin):
+    @bindable(str)
+    def text(self) -> str:
+        return self._text
+
+    @text.setter
+    def text(self, val: str) -> None:
+        self._text = val
+        TextControl._set(self)
+
+    def __init__(self, text: Union[str, AbstractBinding]='') -> None:
+        if isinstance(text, AbstractBinding):
+            self.bound_text = text
+            self.bound_text.on_changed.connect(self._on_text_changed)
+            self._text = text.value
+        else:
+            self._text = text
+
+    def _on_text_changed(self, signal, sender, event):
+        self.text = self.bound_text.value
+
+    def _set(self) -> None:
+        if self.ns_object:
+            self.ns_object.stringValue = self.text
+
+    def set_text(self, text: Union[str, AbstractBinding]):
+        def __modifier():
+            if isinstance(text, AbstractBinding):
+                self.bound_text = text
+                self.bound_text.on_changed.connect(self._on_text_changed)
+                self.text = text.value
+            else:
+                self.text = text
 
         self._modifiers.append(__modifier)
 
