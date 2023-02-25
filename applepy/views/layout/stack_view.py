@@ -109,7 +109,7 @@ class StackView(StackedView,
         Do not call it directly, use the ns_object property instead.
 
         Returns:
-            NSStackView: the syack view's NSStackView instance.
+            NSStackView: the stack view's NSStackView instance.
         """
         return self._stack_view
 

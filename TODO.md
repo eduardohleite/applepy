@@ -1,7 +1,7 @@
 # TODO list before 0.1 release
 
 ### Documentation
-- [ ] views/menu.py
+- [x] views/menu.py
 - [ ] views/controls/control.py
 - [ ] base/*.py
 - [ ] base/transform_mixins/*.py

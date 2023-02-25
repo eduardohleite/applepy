@@ -1,10 +1,11 @@
 from typing import Callable, Optional, Union
 
 from .. import View, StackedView, Image, ImagePosition
-from ..backend.app_kit import NSMenu, NSMenuItem, NSSize
+from ..backend.app_kit import NSMenu, NSMenuItem, NSButton, NSSize
 from ..base.mixins import AttachableMixin
 from ..base.app import get_current_app, StatusBarApp
 from ..base.utils import attachable
+from ..base.errors import NotStatusBarAppError
 from ..base.binding import AbstractBinding, bindable
 from ..base.transform_mixins import Enable, TitledControl, KeyBindable, ImageControl
 
@@ -275,8 +276,19 @@ class MenuItem(View,
 class StatusIcon(StackedView,
                  ImageControl,
                  TitledControl):
+
+    """ Control that generates a native MacOS icon in the Status Bar. """
+
     @bindable(bool)
     def is_template(self) -> bool:
+        """
+        Whether the image in the icon is a template image, i.e. should adapt itself
+        to changes in the Operating System's theme.
+        Data Binding: This property is a read-only bind. Setting this value will have no effect.
+
+        Returns:
+            bool: True if the image in the icon is a template image, False otherwise.
+        """        
         return self._is_template
 
     @is_template.setter
@@ -285,6 +297,13 @@ class StatusIcon(StackedView,
 
     @attachable(Menu)
     def menu(self) -> Menu:
+        """
+        A menu to be displayed when user clicks the Status Bar button.
+        Do not call it directly, instead, add a Menu element to the StatusIcon's stack.
+
+        Returns:
+            Menu: The menu displayed when user clicks the Status Bar button.
+        """        
         return self._menu
 
     @menu.setter
@@ -292,11 +311,64 @@ class StatusIcon(StackedView,
         self._menu = val
         get_current_app().status_bar_icon.menu = self.menu.ns_object if self.menu else None
 
-    def __init__(self, image: Optional[Union[Image, AbstractBinding]]=None,
-                       image_position: Optional[Union[ImagePosition, AbstractBinding]]=None,
-                       is_template: bool=True) -> None:
+    def __init__(self, *, image: Optional[Union[Image, AbstractBinding]]=None,
+                          image_position: Optional[Union[ImagePosition, AbstractBinding]]=None,
+                          is_template: bool=True) -> None:
+        """
+        Add a new `StatusIcon` view, which adds an icon to the Operating System's Status Bar
+        while the application is running. A menu can be specified with a `with` statement:
+
+        >>> with StatusIcon():
+                with Menu():
+                    Submenu('Hello, World')
+
+        Usually, the StatusIcon will display an image. The image can be a template image, i.e.
+        adapt itself automatically to changes in the Operating System's theme. Before setting
+        an image as template, make sure all pixels in the image are black and the visibility of
+        each pixel is controlled by the Alpha channel. Please refer to Apple's documentation for
+        more details.
+        In case the image should not be treated as a template image, set it in the `is_template`
+        initializer:
+
+        >> StatusIcon(image=Image.from_file('icon.png'), is_template=False)
+
+        The icon can also contain text, which is set with the `set_title` modifier. When using
+        text, pay attention to the `image_position` initializer. The following sample will not
+        display any text:
+
+        >> StatusIcon(image=Image.from_file('icon.png')) \
+            .set_title('Application')
+
+        That is because, if an image is supplied, the default value for `image_position` is
+        `ImagePosition.image_only`.
+
+        The next example will, however display the text:
+
+        >> StatusIcon() \
+            .set_title('Application')
+
+        That is because, if no image is supplied, the default value for `image_position` is
+        `ImagePosition.no_image`.
+
+        If you do want to display both an image and a text at once, you can control the placement
+        of them using the `image_position` initializer. For example, the following example will
+        display both the image (on the left) and the text (on the right):
+
+        >> StatusIcon(image=Image.from_system('NSInfo'),
+                      image_position=ImagePosition.image_left) \
+                .set_title('Application')
+
+        Args:
+            image (Optional[Union[Image, AbstractBinding]], optional): Optional image to be displayed in the Status Bar icon. Defaults to None.
+            image_position (Optional[Union[ImagePosition, AbstractBinding]], optional): Optional placement of the button image. Defaults to None.
+            is_template (bool, optional): Whether the image in the icon is a template image. Defaults to True.
+
+        Raises:
+            NotStatusBarAppError: StatusIcon can only be used in a StatusBarApp
+        """                         
+                       
         if not isinstance(get_current_app(), StatusBarApp):
-            raise Exception('StatusIcon can only be used in a StatusBarApp')
+            raise NotStatusBarAppError()
 
         self._image = None
         self._menu = None
@@ -310,16 +382,30 @@ class StatusIcon(StackedView,
                               ImagePosition.image_only,
                               self._before_set_image)
 
-    def _before_set_image(self, image: Image):
+    def _before_set_image(self, image: Image) -> None:
         size = get_current_app().status_bar_icon.statusBar.thickness * 0.8
         image.value.size = NSSize(size, size)
         image.value.template = self.is_template
         self._image = image
 
-    def get_ns_object(self):
+    def get_ns_object(self) -> NSButton:
+        """
+        The Status Bar item's button's NSButton instance.
+        Do not call it directly, use the ns_object property instead.
+
+        Returns:
+            NSButton: the Status Bar item's button's NSButton instance.
+        """
         return get_current_app().status_bar_icon.button
 
-    def parse(self):
+    def parse(self) -> StackedView:
+        """
+        View's parse method.
+        It is used internally for rendering the components. Do not call it directly.
+
+        Returns:
+            StatusIcon: self
+        """
         StackedView.parse(self)
         TitledControl.parse(self, TitledControl)
         ImageControl.parse(self, ImageControl)
