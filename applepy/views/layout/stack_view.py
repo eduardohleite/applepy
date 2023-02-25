@@ -19,6 +19,7 @@ class StackView(StackedView,
                 LayoutSpacing,
                 LayoutPadding,
                 LayoutAlignment):
+
     """ Layout view horizontally or vertically in a stack. """
 
     @bindable(StackOrientation)
