@@ -23,8 +23,9 @@
 - [x] Submenu action
 - [ ] StatusIcon action
 - [x] Attach Menu to StatusIcon
-- [ ] Alert
-- [ ] Dialog
+- [ ] Notification
+- [x] Alert
+- [ ] Dialogs
 - [ ] List binding
 - [ ] iOS/UI Kit backend
 - [ ] Examples

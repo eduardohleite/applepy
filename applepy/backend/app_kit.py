@@ -25,6 +25,7 @@ NSLayoutConstraint = ObjCClass('NSLayoutConstraint')
 NSStatusBar = ObjCClass('NSStatusBar')
 NSStatusItem = ObjCClass('NSStatusItem')
 NSImage = ObjCClass('NSImage')
+NSAlert = ObjCClass('NSAlert')
 
 
 NSApp = NSApplication.sharedApplication
