@@ -12,7 +12,7 @@ Applepy is a UI library inspired by Swift UI that leverages AppKit and UIKit (so
 ## Installation
 
 The latest version is available for installation in PyPI:
->pip install applepy
+>pip install applepy-ui
 
 ## Usage
 

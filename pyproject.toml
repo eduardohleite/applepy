@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "applepy-ui"
+version = "0.0.1"
+description = "Applepy is a UI library inspired by Swift UI that leverages AppKit and UIKit (soon) to create native MacOS, iOS and iPadOS user interfaces in the Python programming language with a declarative syntax."
+readme = "README.md"
+authors = [{ name = "Eduardo Henrique", email = "eduardohleite@gmail.com" }]
+license = { file = "LICENSE" }
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+]
+keywords = ["MacOS", "iOS", "gui"]
+dependencies = [
+    "rubicon-objc >= 0.4.5",
+    "PyDispatcher >= 2.0.7",
+]
+requires-python = ">=3.7"
+
+[project.urls]
+Homepage = "https://github.com/eduardohleite/applepy"
