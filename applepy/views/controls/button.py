@@ -94,13 +94,11 @@ class Checkbox(Button,
         Example:
         >>> Checkbox(title='Push me')
 
-        An action and can also be set in the initializers:
-
+        An action can also be set in the initializers:
         >>> Checkbox(title='Quit',
                      action=self.quit)
 
         The `checked` state can be managed through the `state` modifier.
-
         >>> Checkbox(title='is visible') \
                 .set_state(Binding(Window.visible, w))
 
@@ -178,5 +176,71 @@ class ImageButton(Button,
         """
         Button.parse(self)
         ImageControl.parse(self, ImageControl)
+
+        return self
+
+
+class RadioButton(Button, ControlWithState):
+    """ Control that generates a native MacOS Radio button. """
+
+    def __init__(self, *, title: Union[str, AbstractBinding],
+                          action: Optional[Callable] = None,
+                          key_equivalent: Optional[str] = None) -> None:
+        """
+        Add a new `RadioButton` view, which creates a MacOS native Radio Button.
+
+        Example:
+        >>> RadioButton(title='Yes')
+
+        An action can also be set in the initializers:
+        >>> RatioButton(title='Yes',
+                        action=self.say_yes)
+
+        The `checked` state can be managed through the `state` modifier.
+        >>> RatioButton(title='is visible') \
+                .set_state(Binding(Window.visible, w))
+
+        To make the `RadioButton` part of a group, place them as children of the same
+        stack view and give them an action:
+        >>> with HorizontalStack():
+                with VerticalStack():
+                    Label(text='What do you say?')
+                    RadioButton(title='Yes', action=self.yes_no)
+                    RadioButton(title='No', action=self.yes_no)
+
+                with VerticalStack():
+                    Label(text='What do I say?')
+                    RadioButton(title='Stop', action=self.stop_gogogo)
+                    RadioButton(title='Go, go, go', action=self.stop_gogogo)
+
+
+        Args:
+            title (Union[str, AbstractBinding]): The radio button's title.
+            action (Optional[Callable], optional): The action to be executed when the radio button is clicked. Defaults to None.
+            key_equivalent (Optional[str], optional): The radio button's key shortcut. Defaults to None.
+        """        
+        Button.__init__(self, title=title, action=action, key_equivalent=key_equivalent)
+        ControlWithState.__init__(self)
+
+    def parse(self) -> Button:
+        """
+        View's parse method.
+        It is used internally for rendering the components. Do not call it directly.
+
+        Returns:
+            RadioButton: self
+        """
+        self._button = NSButton.radioButtonWithTitle_target_action_(self.title, None, None)
+
+        if self.action:
+            self._button.setAction_(
+                get_current_app().register_action(self._button, self.action)
+            )
+
+        Control.parse(self)
+        TitledControl.parse(self, TitledControl)
+        BezelColor.parse(self, BezelColor)
+        KeyBindable.parse(self, KeyBindable)
+        ControlWithState.parse(self, ControlWithState)
 
         return self

@@ -14,15 +14,15 @@
 - [x] ImageButton
 - [ ] Toolbar
 - [ ] ToolbarButton
-- [ ] RadioButton
-- [ ] RadioButtonGroup
+- [x] RadioButton
+- [x] RadioButtonGroup
 - [ ] DecoratedView
 - [ ] Combobox
 
 ### Features
-- [ ] Submenu action
+- [x] Submenu action
 - [ ] StatusIcon action
-- [ ] Attach Menu to StatusIcon
+- [x] Attach Menu to StatusIcon
 - [ ] Alert
 - [ ] Dialog
 - [ ] List binding

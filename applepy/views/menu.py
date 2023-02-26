@@ -114,6 +114,7 @@ class MainMenu(StackedView, AttachableMixin):
 
 class Submenu(StackedView,
               TitledControl,
+              Enable,
               KeyBindable):
     """
     Control that generates a native MacOS submenu that can be attached to a
