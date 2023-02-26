@@ -9,7 +9,7 @@
 - [ ] \_\_init__.py
 
 ### Components
-- [ ] Spacer
+- [x] Spacer
 - [ ] ImageView
 - [x] ImageButton
 - [ ] Toolbar

@@ -140,6 +140,7 @@ class StackView(StackedView,
 
 class HorizontalStack(StackView):
     """ Layout view horizontally in a stack. """
+
     def __init__(self, *, alignment: Alignment=Alignment.center_y,
                           distribution: Optional[StackDistribution]=None) -> None:
         """
@@ -173,6 +174,7 @@ class HorizontalStack(StackView):
 
 class VerticalStack(StackView):
     """ Layout view vertically in a stack. """
+
     def __init__(self, *, alignment: Alignment=Alignment.center_x,
                           distribution: Optional[StackDistribution]=None) -> None:
         """
@@ -202,3 +204,45 @@ class VerticalStack(StackView):
         super().__init__(orientation=StackOrientation.vertical,
                          alignment=alignment,
                          distribution=distribution)
+
+
+class Spacer(View, BackgroundColor):
+    """ A Layout view that fills all the remaining space in a stack."""
+
+    def __init__(self) -> None:
+        """
+        Create a new `Spacer`, which will fill the remaining space in a Stack.
+        Can only be used as a child of a StackView.
+        Example:
+        >>> with VerticalStack():
+                Label(text='Top of the stack!')
+                Spacer()
+                Label(text='Bottom of the stack!')
+        """         
+        super().__init__((StackedView,))
+        self._stack_view = None
+
+    def parse(self) -> View:
+        """
+        View's parse method.
+        It is used internally for rendering the components. Do not call it directly.
+
+        Returns:
+            Spacer: self
+        """
+        self._stack_view = NSStackView.alloc().init()
+        self._stack_view.orientation = StackOrientation.vertical
+        self._stack_view.distribution = StackDistribution.fill
+
+        self.parent.ns_object.addArrangedSubview_(self.ns_object)
+        return super().parse()
+
+    def get_ns_object(self) -> NSStackView:
+        """
+        The spacer's NSStackView instance.
+        Do not call it directly, use the ns_object property instead.
+
+        Returns:
+            NSStackView: the stack view's NSStackView instance.
+        """
+        return self._stack_view
