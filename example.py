@@ -51,14 +51,4 @@ class Sample(App):
                 vs.set_padding()
             return w.center()
 
-class Sample2(App):
-    def body(self) -> Scene:
-        with Window(title='Applepy example', size=Size(640, 100)) as w:
-            with VerticalStack():
-                with HorizontalStack():
-                    Label(text='Hello')
-                    Label(text='World')
-                
-            return w.center()
-Sample2().run()
-#Sample().run()
+Sample().run()
