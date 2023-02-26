@@ -2,32 +2,34 @@
 
 ### Documentation
 - [x] views/menu.py
-- [ ] views/controls/control.py
+- [x] views/controls/control.py
 - [ ] base/*.py
 - [ ] base/transform_mixins/*.py
 - [ ] base/types/*.pi
 - [ ] \_\_init__.py
+- [x] README.md
 
 ### Components
-- [ ] Spacer
+- [x] Spacer
 - [ ] ImageView
 - [x] ImageButton
 - [ ] Toolbar
 - [ ] ToolbarButton
-- [ ] RadioButton
-- [ ] RadioButtonGroup
+- [x] RadioButton
+- [x] RadioButtonGroup
 - [ ] DecoratedView
 - [ ] Combobox
 
 ### Features
-- [ ] Submenu action
+- [x] Submenu action
 - [ ] StatusIcon action
-- [ ] Attach Menu to StatusIcon
-- [ ] Alert
-- [ ] Dialog
+- [x] Attach Menu to StatusIcon
+- [ ] Notification
+- [x] Alert
+- [ ] Dialogs
 - [ ] List binding
 - [ ] iOS/UI Kit backend
-- [ ] Examples
+- [x] Examples
 - [ ] Standalone documentation generation
 - [ ] pip packaging
 - [ ] pip publishing

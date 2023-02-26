@@ -5,3 +5,5 @@ from .menu import (
     MenuItem,
     StatusIcon
 )
+
+from .feedback import Alert

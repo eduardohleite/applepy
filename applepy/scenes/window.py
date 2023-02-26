@@ -345,3 +345,13 @@ class Window(Scene,
         
         self.content_view = content_view
         self.window.contentView = content_view
+
+    def center(self) -> None:
+        """
+        Center the window in the screen.
+        """        
+        def __modifier():
+            self.window.center()
+
+        self._modifiers.append(__modifier)
+        return self

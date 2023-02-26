@@ -1,5 +1,6 @@
 from .stack_view import (
     StackView,
     HorizontalStack,
-    VerticalStack
+    VerticalStack,
+    Spacer
 )
