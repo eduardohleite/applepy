@@ -3,8 +3,13 @@ from uuid import uuid4
 from pydispatch import dispatcher
 from abc import ABC, abstractmethod
 
+from .errors import (
+    InvalidBindingTransformError,
+    InvalidBindingExpressionError
+)
 
-class Signal:
+
+class Signal: 
     def __init__(self) -> None:
         self._id = uuid4().hex
 
@@ -100,28 +105,75 @@ class AbstractBinding(ABC):
 
 
 class Binding(AbstractBinding):
+    """
+    A value that can be watched using the Observable pattern.
+    """
     def __init__(self, bindable: Bindable,
                        instance: Any) -> None:
+        """
+        Create a one-way or two-way binding between `@bindable` properties.
+        By using a binding instead of a variable reference, when the value of
+        the property changes, the bound value will also change.
+        Example:
+        >>> Button(title=Binding(ViewModel.button_title, self.vm))
+
+        If the field needs to be transformed before binding, use a `transform` modifier.
+        Note that transformed bindings will automatically become one-way bindings.
+        Example:
+        >>> Label(text=Binding(Person.gender, self.vm.person)
+                .transform(lambda x: 'Male' if x == Gender.male else 'Female'))
+
+        If the binding should be more complex, i.e. using more than a field in the transform
+        expression, use a `BindingExpression` instead.
+
+        Args:
+            bindable (Bindable): `@bindable` property to bind to.
+            instance (Any): Instance that contains the desided `@bindable` property.
+        """
         self.bindable = bindable
         self.instance = instance
 
         self.transforms = []
 
-    def transform(self, transform: Callable):
+    def transform(self, transform: Callable) -> AbstractBinding:
+        """
+        Transform the bound value before passing it over to the binding property.
+
+        Args:
+            transform (Callable): A function (or lambda expression) that modifies the bound value.
+
+        Returns:
+            Binding: self
+        """        
         self.transforms.append(transform)
         return self
 
     @property
-    def on_changed(self):
+    def on_changed(self) -> Signal:
+        """
+        Signal that is triggered when the bound value has changed.
+
+        Returns:
+            Signal: The signal that is triggered when the bound value has changed.
+        """        
         return self.bindable.on_changed
 
     @property
-    def value(self):
+    def value(self) -> Any:
+        """
+        The new binding value after applying all transforms.
+
+        Raises:
+            Exception: _description_
+
+        Returns:
+            Any: The new binding value after applying all transforms.
+        """        
         new_value = self.bindable.fget(self.instance)
 
         for transform in self.transforms:
             if not callable(transform):
-                raise Exception('bla')
+                raise InvalidBindingTransformError()
 
             new_value = transform(new_value)
 
@@ -139,26 +191,55 @@ class Binding(AbstractBinding):
 
 
 class BindingExpression(AbstractBinding):
+    """
+    One or more values that can be combined into a watchable expression using the Observable pattern.
+    """
+
     def __init__(self, expression: Callable, *args: Tuple[Bindable, Any]) -> None:
+        """
+        Create a one-way or two-way binding between a `@bindable` property and an expression
+        containing one or more `@bindable` properties.
+        By using a binding expression instead of a variable reference, when the value of
+        the property changes, the bound value will also change.
+        Example:
+        >>> Button(title='Ok') \
+                .is_enabled(BindingExpression(lambda n, v: n is not None and v > 10,
+                                                (ViewModel.name, self.vm),
+                                                (ViewModel.value, self.vm)))
+
+        If the binding should be simple, i.e. using just one field in the transform
+        expression, use a `Binding` instead with a `transform` modifier.
+
+        If the binding should be two-way, refactor it as to use a single `@bindable` property
+        in the expression and use a `Binding` instead, without a `transform` modifier.
+
+        Args:
+            expression (Callable): expression to be evaluated after the binding.
+
+        Raises:
+            InvalidBindingExpressionError: At least one bindable and one instance must be provided.
+            InvalidBindingExpressionError: Must provide a callable expression.
+            InvalidBindingExpressionError: Invalid argument. Must a tuple of bindable and instance.
+        """
         if len(args) == 0:
-            raise Exception('At least one bindable and one instance must be provided.')
+            raise InvalidBindingExpressionError('At least one bindable and one instance must be provided.')
 
         self.bindables = []
         self._on_changed = Signal()
 
         if not callable(expression):
-            raise Exception('Must provide a callable expression.')
+            raise InvalidBindingExpressionError('Must provide a callable expression.')
 
         self.expression = expression
 
         for arg in args:
             if type(arg) != tuple:
-                raise Exception('Invalid argument. Must a tuple of bindable and instance.')
+                raise InvalidBindingExpressionError('Invalid argument. Must a tuple of bindable and instance.')
 
             bindable, _ = arg
 
             if type(bindable) != Bindable:
-                raise Exception('Invalid argument. Must a tuple of bindable and instance.')
+                raise InvalidBindingExpressionError('Invalid argument. Must a tuple of bindable and instance.')
 
             bindable.on_changed.connect(self._on_property_in_expression_changed)
 
@@ -168,10 +249,23 @@ class BindingExpression(AbstractBinding):
         self.on_changed.emit()
 
     @property
-    def value(self):
+    def value(self) -> Any:
+        """
+        Value of the evaluated `Binding Expression`.
+
+        Returns:
+            Any: value of the evaluated `Binding Expression`.
+        """        
         arguments = [b.fget(i) for b, i in self.bindables]
         return self.expression(*arguments)
 
     @property
-    def on_changed(self):
+    def on_changed(self) -> Signal:
+        """
+        Signal that is triggered when any of the bound `@bindable` properties change, so the
+        expression result can be recalculated.
+
+        Returns:
+            Signal: Signal that is triggered when any of the bound `@bindable` properties change.
+        """        
         return self._on_changed
