@@ -7,6 +7,7 @@
 - [ ] base/transform_mixins/*.py
 - [ ] base/types/*.pi
 - [ ] \_\_init__.py
+- [x] README.md
 
 ### Components
 - [x] Spacer
@@ -28,7 +29,7 @@
 - [ ] Dialogs
 - [ ] List binding
 - [ ] iOS/UI Kit backend
-- [ ] Examples
+- [x] Examples
 - [ ] Standalone documentation generation
 - [ ] pip packaging
 - [ ] pip publishing
