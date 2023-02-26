@@ -2,7 +2,7 @@
 
 ### Documentation
 - [x] views/menu.py
-- [ ] views/controls/control.py
+- [x] views/controls/control.py
 - [ ] base/*.py
 - [ ] base/transform_mixins/*.py
 - [ ] base/types/*.pi
