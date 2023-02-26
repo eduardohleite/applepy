@@ -31,5 +31,5 @@
 - [ ] iOS/UI Kit backend
 - [x] Examples
 - [ ] Standalone documentation generation
-- [ ] pip packaging
-- [ ] pip publishing
+- [x] pip packaging
+- [x] pip publishing
