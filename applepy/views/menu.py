@@ -200,7 +200,8 @@ class MenuItem(View,
                           action: Optional[Callable] = None,
                           key_equivalent: str = '') -> None:
         """
-        Add a new `MenuItem` view, which creates a native MacOS menu item that can be attached to a `Submenu`.
+        Add a new `MenuItem` view, which creates a native MacOS menu item that can be attached
+        to a `Menu` or `Submenu`.
 
         Use it within a `with` statement to attach it to the parent submenu.
 
@@ -270,6 +271,54 @@ class MenuItem(View,
         View.parse(self)
         TitledControl.parse(self, TitledControl)
         KeyBindable.parse(self, KeyBindable)
+
+        return self
+
+
+class MenuSeparator(View):
+    """ Control that generates a MacOS native Menu Separator. """
+
+    def __init__(self) -> None:
+        """
+        Add a new `MenuSeparator` view, which creates a native MacOS menu separator that can be attached
+        to a `Menu` or `Submenu`.
+        Example:
+        >>> with MainMenu():
+                with Submenu(title='File'):
+                    MenuItem(title='New')
+                    MenuItem(title='Open...')
+                    MenuSeparator()
+                    MenuItem(title='Save')
+        """        
+        super().__init__((Submenu, Menu))
+        self._menu_item = None
+
+    def get_ns_object(self) -> NSMenuItem:
+        """
+        The Menu Separator's NSMenuItem instance.
+        Do not call it directly, use the ns_object property instead.
+
+        Returns:
+            NSMenuItem: the Menu Separator's NSMenuItem instance.
+        """
+        return self._menu_item
+
+    def parse(self) -> View:
+        """
+        View's parse method.
+        It is used internally for rendering the components. Do not call it directly.
+
+        Returns:
+            MenuSeparator: self
+        """
+        self._menu_item = NSMenuItem.separatorItem()
+
+        if isinstance(self.parent, Submenu):
+            self.parent._main_menu_item_menu.addItem(self._menu_item)
+        else:
+            self.parent.ns_object.addItem(self._menu_item)
+
+        super().parse()
 
         return self
 

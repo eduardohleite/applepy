@@ -98,9 +98,10 @@ class App(ABC, StackMixin):
         self._actions = {}
 
     def _register_scene(self) -> None:
-        self._scene.is_main = True
-        self._controller.mainWindow = self._scene.window
-        NSApp.activateIgnoringOtherApps_(True)
+        from ..scenes import Window
+        if isinstance(self._scene, Window):
+            self._controller.mainWindow = self._scene.window
+            NSApp.activateIgnoringOtherApps_(True)
 
     @abstractmethod
     def body(self):
