@@ -2,6 +2,7 @@ from typing import Union, Optional, Callable
 from threading import Timer as TimerThread
 
 from .. import bindable, AbstractBinding
+from ..base.utils import try_call
 
 
 class Timer:
@@ -101,7 +102,7 @@ class Timer:
 
     def _set_timer(self) -> None:
         def __timeout():
-            self._action()
+            try_call(self._action)
             if self.repeat and self.enabled:
                 self._set_timer()
             else:

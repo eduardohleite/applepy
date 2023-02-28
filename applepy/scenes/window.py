@@ -1,8 +1,8 @@
 from typing import Callable, Optional, Union
-
-from applepy.views.menu import MainMenu
+from uuid import uuid4
 
 from .. import Scene, Size, Point
+from ..views.menu import MainMenu
 from ..base.binding import AbstractBinding, bindable
 from ..base.mixins import Modifiable
 from ..base.utils import attachable, try_call
@@ -182,37 +182,45 @@ class Window(Scene,
         BackgroundColor.__init__(self)
         TitledControl.__init__(self, title)
 
-        class _WindowDelegate(NSObject):
-            @objc_method
-            def windowWillClose_(_self, sender):
-                try_call(on_close)
+        @objc_method
+        def windowWillClose_(_self, sender):
+            try_call(on_close)
 
-            @objc_method
-            def windowDidEndLiveResize_(_self, notification):
-                w_rect = self.window.contentRectForFrameRect_(self.window.frame)
-                self.size = Size(int(w_rect.size.width), int(w_rect.size.height))
-                self.position = Point(int(w_rect.origin.x), int(w_rect.origin.y))
-                try_call(on_resized)
+        @objc_method
+        def windowDidEndLiveResize_(_self, notification):
+            w_rect = self.window.contentRectForFrameRect_(self.window.frame)
+            self.size = Size(int(w_rect.size.width), int(w_rect.size.height))
+            self.position = Point(int(w_rect.origin.x), int(w_rect.origin.y))
+            try_call(on_resized)
 
-            @objc_method
-            def windowDidMove_(_self, notification):
-                w_rect = self.window.contentRectForFrameRect_(self.window.frame)
-                self.position = Point(int(w_rect.origin.x), int(w_rect.origin.y))
-                try_call(on_moved)
+        @objc_method
+        def windowDidMove_(_self, notification):
+            w_rect = self.window.contentRectForFrameRect_(self.window.frame)
+            self.position = Point(int(w_rect.origin.x), int(w_rect.origin.y))
+            try_call(on_moved)
 
-            @objc_method
-            def windowWillEnterFullScreen_(_self, notification):
-                self.full_screen = True
-                try_call(on_full_screen_changed)
+        @objc_method
+        def windowWillEnterFullScreen_(_self, notification):
+            self.full_screen = True
+            try_call(on_full_screen_changed)
 
-            @objc_method
-            def windowWillExitFullScreen_(_self, notification):
-                self.full_screen = False
-                try_call(on_full_screen_changed)
+        @objc_method
+        def windowWillExitFullScreen_(_self, notification):
+            self.full_screen = False
+            try_call(on_full_screen_changed)
 
-            @objc_method
-            def windowDidMiniaturize_(self, notification):
-                try_call(on_minimized)
+        @objc_method
+        def windowDidMiniaturize_(self, notification):
+            try_call(on_minimized)
+
+        _WindowDelegate = type(f'_WindowDelegate_{uuid4().hex[:8]}', (NSObject,), {
+            'windowWillClose_': windowWillClose_,
+            'windowDidEndLiveResize_': windowDidEndLiveResize_,
+            'windowDidMove_': windowDidMove_,
+            'windowWillEnterFullScreen_': windowWillEnterFullScreen_,
+            'windowWillExitFullScreen_': windowWillExitFullScreen_,
+            'windowDidMiniaturize_': windowDidMiniaturize_
+        })
 
         self.window = None
         self._controller = _WindowDelegate.alloc().init()
@@ -243,7 +251,7 @@ class Window(Scene,
         self._menu: Optional[View] = None
         self._toolbar: Optional[View] = None
 
-        # infered properties
+        # inferred properties
         self.is_main = False
 
     def body(self) -> Scene:

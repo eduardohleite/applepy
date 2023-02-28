@@ -10,6 +10,7 @@
 - [x] README.md
 
 ### Components
+- [ ] DatePicker
 - [x] Timer
 - [x] MenuSeparator
 - [x] Spacer

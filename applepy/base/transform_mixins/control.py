@@ -47,7 +47,7 @@ class TitledControl(TransformMixin):
 
 class Placeholder(TransformMixin):
     @bindable(str)
-    def placeholder(self) -> str:
+    def placeholder(self) -> Optional[str]:
         return self._placeholder
 
     @placeholder.setter
@@ -64,7 +64,7 @@ class Placeholder(TransformMixin):
     def _set(self) -> None:
         self.ns_object.placeholderString = self.placeholder
 
-    def set_placeholder(self, placeholder: Union[str, AbstractBinding]):
+    def set_placeholder(self, placeholder: Union[Optional[str], AbstractBinding]):
         def __modifier():
             if isinstance(placeholder, AbstractBinding):
                 self.bound_placeholder = placeholder
@@ -161,7 +161,7 @@ class KeyBindable(TransformMixin):
         self.key_equivalent = self.bound_key_equivalent.value
 
     def _set(self) -> None:
-        self.ns_object.keyEquivalent = self.key_equivalent
+        self.ns_object.keyEquivalent = self.key_equivalent or ''
 
     def set_key_equivalent(self, key_equivalent: Union[str, AbstractBinding]):
         def __modifier():

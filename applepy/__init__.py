@@ -10,7 +10,8 @@ from .base.types import (
     Alignment,
     StackOrientation,
     StackDistribution,
-    ImagePosition
+    ImagePosition,
+    Date
 )
 from .base.binding import (
     bindable,
