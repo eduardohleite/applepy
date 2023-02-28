@@ -10,7 +10,7 @@
 - [x] README.md
 
 ### Components
-- [ ] Timer
+- [x] Timer
 - [x] MenuSeparator
 - [x] Spacer
 - [ ] ImageView
