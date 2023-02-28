@@ -104,20 +104,9 @@ class TextField(Control,
             'controlTextDidChange_': controlTextDidChange_
         })
 
-        # class _TextFieldDelegate(NSObject):
-        #     @objc_method
-        #     def controlTextDidChange_(_self, notification):
-        #         self.text = str(self._text_field.stringValue)
-        #         if self.bound_text:
-        #             self.bound_text.value = self._text
-
-        #         try_call(on_text_changed)
-
         self._text_field = None
-        self.bound_text = None
 
         self._controller = _TextFieldDelegate.alloc().init()
-        i = 0
 
     def get_ns_object(self) -> NSTextField:
         """
