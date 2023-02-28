@@ -1,4 +1,5 @@
 from typing import Union, Optional, Callable
+from uuid import uuid4
 
 from .control import Control
 from ...backend.app_kit import NSTextField, NSObject, objc_method
@@ -91,19 +92,32 @@ class TextField(Control,
         Placeholder.__init__(self)
         TextControl.__init__(self, text)
 
-        class _TextFieldDelegate(NSObject):
-            @objc_method
-            def controlTextDidChange_(_self, notification):
-                self.text = str(self._text_field.stringValue)
-                if self.bound_text:
-                    self.bound_text.value = self._text
+        @objc_method
+        def controlTextDidChange_(_self, notification):
+            self.text = str(self._text_field.stringValue)
+            if self.bound_text:
+                self.bound_text.value = self._text
 
-                try_call(on_text_changed)
+            try_call(on_text_changed)
+
+        _TextFieldDelegate = type(f'_TextFieldDelegate_{uuid4().hex[:8]}', (NSObject,), {
+            'controlTextDidChange_': controlTextDidChange_
+        })
+
+        # class _TextFieldDelegate(NSObject):
+        #     @objc_method
+        #     def controlTextDidChange_(_self, notification):
+        #         self.text = str(self._text_field.stringValue)
+        #         if self.bound_text:
+        #             self.bound_text.value = self._text
+
+        #         try_call(on_text_changed)
 
         self._text_field = None
         self.bound_text = None
 
         self._controller = _TextFieldDelegate.alloc().init()
+        i = 0
 
     def get_ns_object(self) -> NSTextField:
         """
