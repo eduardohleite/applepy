@@ -26,6 +26,10 @@ NSStatusBar = ObjCClass('NSStatusBar')
 NSStatusItem = ObjCClass('NSStatusItem')
 NSImage = ObjCClass('NSImage')
 NSAlert = ObjCClass('NSAlert')
+NSDate = ObjCClass('NSDate')
+NSDateComponents = ObjCClass('NSDateComponents')
+NSCalendar = ObjCClass('NSCalendar')
+NSDatePicker = ObjCClass('NSDatePicker')
 
 
 NSApp = NSApplication.sharedApplication
@@ -66,3 +70,12 @@ class NSStackViewGravity(Enum):
     NSStackViewGravityCenter = 2
     NSStackViewGravityBottom = 3
     NSStackViewGravityTrailing = 3
+
+
+class NSDatePickerElementFlags(Enum):
+    NSDatePickerElementFlagEra = 0x0100
+    NSDatePickerElementFlagHourMinute = 0x000c
+    NSDatePickerElementFlagHourMinuteSecond = 0x000e
+    NSDatePickerElementFlagTimeZone = 0x0010
+    NSDatePickerElementFlagYearMonth = 0x00c0
+    NSDatePickerElementFlagYearMonthDay = 0x00e0

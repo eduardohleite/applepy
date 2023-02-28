@@ -60,6 +60,9 @@ class Bindable(property):
     def __get__(self, *args, **kwargs) -> Any:
         res = super().__get__(*args, **kwargs)
 
+        if res is None:
+            return None
+
         if isinstance(res, Bindable):
             return res
 

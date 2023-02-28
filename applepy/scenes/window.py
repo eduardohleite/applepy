@@ -251,7 +251,7 @@ class Window(Scene,
         self._menu: Optional[View] = None
         self._toolbar: Optional[View] = None
 
-        # infered properties
+        # inferred properties
         self.is_main = False
 
     def body(self) -> Scene:
