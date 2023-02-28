@@ -10,6 +10,8 @@
 - [x] README.md
 
 ### Components
+- [x] Timer
+- [x] MenuSeparator
 - [x] Spacer
 - [ ] ImageView
 - [x] ImageButton
@@ -33,3 +35,4 @@
 - [ ] Standalone documentation generation
 - [x] pip packaging
 - [x] pip publishing
+- [x] empty scene
