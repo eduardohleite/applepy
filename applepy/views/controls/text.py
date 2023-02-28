@@ -105,7 +105,6 @@ class TextField(Control,
         })
 
         self._text_field = None
-
         self._controller = _TextFieldDelegate.alloc().init()
 
     def get_ns_object(self) -> NSTextField:
