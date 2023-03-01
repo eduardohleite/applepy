@@ -1,6 +1,6 @@
 from typing import Optional, Tuple
 
-from ..backend.app_kit import NSAlert
+from ..backend.app_kit import NSAlert, NSOpenPanel, NSSavePanel, UTType, NSURL
 from ..base.types import AlertStyle, AlertResponse, Image
 
 
@@ -171,4 +171,48 @@ class Alert:
                     question,
                     ('Ok', 'Cancel'),
                     custom_image)
-        response = alert.show()
+        return alert.show()
+
+
+class OpenModal:
+    def __init__(self,
+                 title: str,
+                 path: Optional[str]=None,
+                 allowed_extensions: Optional[Tuple[str]]=None,
+                 prompt: Optional[str]=None,
+                 message: Optional[str]=None,
+                 can_choose_files: bool=True,
+                 can_choose_directories: bool=False,
+                 resolve_aliases: bool=True,
+                 allow_multiple_selection: bool=False,
+                 can_create_directories: bool=False,
+                 can_show_all_extensions: bool=False,
+                 expanded: bool=False
+                ) -> None:
+        self.modal = NSOpenPanel.openPanel()
+        self.modal.title = title
+        self.modal.message = message or ''
+        self.modal.canChooseFiles = can_choose_files
+        self.modal.canChooseDirectories = can_choose_directories
+        self.modal.resolvesAliases = resolve_aliases
+        self.modal.allowsMultipleSelection = allow_multiple_selection
+        self.modal.canCreateDirectories = can_create_directories
+        self.modal.canSelectHiddenExtension = can_show_all_extensions
+        self.modal.expanded = expanded
+
+        if prompt:
+            self.modal.prompt = prompt
+
+        if allowed_extensions:
+            self.modal.allowedContentTypes = [UTType.typeWithFilenameExtension(e) for e in allowed_extensions]
+
+        if path:
+            self.modal.directoryURL = NSURL.fileURLWithPath_(path)
+
+    def show(self):
+        return self.modal.runModal()
+
+    @classmethod
+    def open_file(cls, title: str):
+        modal = cls(title)
+        return modal.show()

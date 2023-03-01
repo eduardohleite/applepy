@@ -26,13 +26,17 @@ NSStatusBar = ObjCClass('NSStatusBar')
 NSStatusItem = ObjCClass('NSStatusItem')
 NSImage = ObjCClass('NSImage')
 NSAlert = ObjCClass('NSAlert')
+NSOpenPanel = ObjCClass('NSOpenPanel')
+NSSavePanel = ObjCClass('NSSavePanel')
 NSDate = ObjCClass('NSDate')
 NSDateComponents = ObjCClass('NSDateComponents')
 NSCalendar = ObjCClass('NSCalendar')
 NSDatePicker = ObjCClass('NSDatePicker')
-
+NSURL = ObjCClass('NSURL')
 
 NSApp = NSApplication.sharedApplication
+
+UTType = ObjCClass('UTType')
 
 
 class NSWindowStyleMask(Enum):
