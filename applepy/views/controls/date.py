@@ -4,6 +4,7 @@ from uuid import uuid4
 from ... import View, Date
 from ...backend.app_kit import (
     NSObject,
+    objc_id,
     NSDatePicker,
     NSDatePickerElementFlags,
     objc_method
@@ -48,7 +49,10 @@ class DatePicker(Control):
             self._date = date
 
         @objc_method
-        def datePickerCell_validateProposedDateValue_timeInterval_(_self, cell, value, interval):
+        def datePickerCell_validateProposedDateValue_timeInterval_(_self, 
+                                                                   datePickerCell: objc_id,
+                                                                   proposedDateValue: int,
+                                                                   proposedTimeInterval: float):
             self.date = self._date_picker.dateValue
             if self.bound_date:
                 self.bound_date.value = self._date

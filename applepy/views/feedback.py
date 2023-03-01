@@ -348,7 +348,7 @@ class FileDialog:
             Tuple[DialogResponse, Optional[str]]: Tuple containing the user's response and the path to the
             selected file if any. None otherwise.
         """        
-        dialog = OpenDialog(title,
+        dialog = OpenDialog(title=title,
                             message=message,
                             allowed_extensions=extensions,
                             initial_path=initial_path)
