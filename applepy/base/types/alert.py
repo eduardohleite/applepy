@@ -12,3 +12,9 @@ class AlertResponse(Enum):
     yes = 1000
     cancel = 1001
     no = 1001
+
+class DialogResponse(Enum):
+    cancel = 0
+    continue_ = 1
+    stop = 2
+    abort = 3
