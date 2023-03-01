@@ -22,7 +22,7 @@ class DatePicker(Control):
     @date.setter
     def date(self, val: Date) -> None:
         self._date = val
-        if self._date_picker:
+        if self._date_picker and val.value != self._date_picker.dateValue:
             self._date_picker.dateValue = self._date.value
 
     def __init__(self, *, date: Union[Date, AbstractBinding],
@@ -46,6 +46,7 @@ class DatePicker(Control):
             self.bound_date.on_changed.connect(self._on_date_changed)
             self._date = date.value
         else:
+            self.bound_date = None
             self._date = date
 
         @objc_method
@@ -53,7 +54,7 @@ class DatePicker(Control):
                                                                    datePickerCell: objc_id,
                                                                    proposedDateValue: int,
                                                                    proposedTimeInterval: float):
-            self.date = self._date_picker.dateValue
+            self.date = Date(self._date_picker.dateValue)
             if self.bound_date:
                 self.bound_date.value = self._date
 

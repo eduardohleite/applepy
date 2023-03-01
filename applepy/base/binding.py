@@ -186,10 +186,11 @@ class Binding(AbstractBinding):
     def value(self, new_val):
         cur_val = self.bindable.fget(self.instance)
         w_type = self.bindable.type_
-        try:
-            new_val = w_type(new_val)
-        except ValueError:
-            new_val = cur_val
+        if not issubclass(w_type, BindableMixin):
+            try:
+                new_val = w_type(new_val)
+            except ValueError:
+                new_val = cur_val
         self.bindable.__set__(self.instance, new_val)
 
 

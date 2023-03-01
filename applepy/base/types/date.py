@@ -25,7 +25,7 @@ class Date(BindableMixin):
         return cls(NSDate.distantFuture())
 
     def __repr__(self) -> str:
-        return self.value.description()
+        return str(self.value.description)
 
     def to_datetime(self) -> datetime:
         return datetime.fromtimestamp(self.value.timeIntervalSince1970())
