@@ -14,7 +14,8 @@ from .base.types import (
     Date,
     AlertResponse,
     AlertStyle,
-    DialogResponse
+    DialogResponse,
+    ProgressStyle
 )
 from .base.binding import (
     bindable,

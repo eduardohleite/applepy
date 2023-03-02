@@ -10,10 +10,12 @@
 - [x] README.md
 
 ### Components
-- [ ] DatePicker
+- [x] DatePicker
 - [x] Timer
 - [x] MenuSeparator
 - [x] Spacer
+- [x] ProgressBar
+- [x] Spinner
 - [ ] ImageView
 - [x] ImageButton
 - [ ] Toolbar
@@ -29,7 +31,7 @@
 - [x] Attach Menu to StatusIcon
 - [ ] Notification
 - [x] Alert
-- [ ] Dialogs
+- [-] Dialogs
 - [ ] List binding
 - [ ] iOS/UI Kit backend
 - [x] Examples

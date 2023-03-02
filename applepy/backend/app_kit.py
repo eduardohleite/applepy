@@ -34,6 +34,7 @@ NSCalendar = ObjCClass('NSCalendar')
 NSDatePicker = ObjCClass('NSDatePicker')
 NSURL = ObjCClass('NSURL')
 NSDatePickerCell = ObjCClass('NSDatePickerCell')
+NSProgressIndicator = ObjCClass('NSProgressIndicator')
 
 NSApp = NSApplication.sharedApplication
 
