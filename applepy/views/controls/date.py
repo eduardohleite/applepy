@@ -1,12 +1,15 @@
 from typing import Union, Optional, Callable
 from uuid import uuid4
+from ctypes import POINTER, c_double
 
 from ... import View, Date
 from ...backend.app_kit import (
+    objc_id,
+    objc_method,
+    ObjCInstance,
     NSObject,
     NSDatePicker,
-    NSDatePickerElementFlags,
-    objc_method
+    NSDatePickerElementFlags
 )
 from ...base.binding import AbstractBinding, bindable
 from ...base.utils import try_call
@@ -14,8 +17,16 @@ from .control import Control
 
 
 class DatePicker(Control):
+    """ Control that generates a native MacOS DatePicker. """
+
     @bindable(Date)
     def date(self) -> Date:
+        """
+        Date selected by the DatePicker.
+
+        Returns:
+            Date: date selected by the DatePicker.
+        """        
         return self._date
 
     @date.setter
@@ -31,6 +42,21 @@ class DatePicker(Control):
                           min_date: Date=Date.min(),
                           max_date: Date=Date.max(),
                           on_date_changed: Optional[Callable]=None) -> None:
+        """
+        Add a new `DatePicker` view, which creates a MacOS native date picker control.
+
+        Example:
+        >>> DatePicker(date=Date.now())
+
+        Args:
+            date (Union[Date, AbstractBinding]): The date selected by the DatePicker.
+            show_date (bool, optional): Whether the DatePicker displays the date. Defaults to True.
+            show_time (bool, optional): Whether the DatePicker displays the time. Defaults to False.
+            show_calendar_overlay (bool, optional): Whether the DatePicker displays the calendar overlay. Defaults to False.
+            min_date (Date, optional): Minimum date selectable by the DatePicker. Defaults to Date.min().
+            max_date (Date, optional): Maximum date selectable by the DatePicker. Defaults to Date.max().
+            on_date_changed (Optional[Callable], optional): Action that is called when the date of the DatePicker has changed. Defaults to None.
+        """        
         super().__init__()
 
         self.min_date = min_date
@@ -45,13 +71,18 @@ class DatePicker(Control):
             self.bound_date.on_changed.connect(self._on_date_changed)
             self._date = date.value
         else:
+            self.bound_date = None
             self._date = date
 
         @objc_method
-        def datePickerCell_validateProposedDateValue_timeInterval_(_self, cell, value, interval):
-            self.date = self._date_picker.dateValue
+        def datePickerCell_validateProposedDateValue_timeInterval_(_self, 
+                                                                   datePickerCell,
+                                                                   proposedDateValue: POINTER(objc_id),
+                                                                   proposedTimeInterval: POINTER(c_double)):
+            new_date_value = ObjCInstance(proposedDateValue.contents)
+            self.date = Date.from_value(new_date_value)
             if self.bound_date:
-                self.bound_date.value = self._date
+                self.bound_date.value = Date.from_value(new_date_value)
 
             try_call(on_date_changed)
 
@@ -66,9 +97,23 @@ class DatePicker(Control):
         self.date = self.bound_date.value
 
     def get_ns_object(self) -> NSDatePicker:
+        """
+        The date picker's NSDatePicker instance.
+        Do not call it directly, use the ns_object property instead.
+
+        Returns:
+            NSDatePicker: the date picker's NSDatePicker instance.
+        """
         return self._date_picker
 
     def parse(self) -> View:
+        """
+        View's parse method.
+        It is used internally for rendering the components. Do not call it directly.
+
+        Returns:
+            DatePicker: self
+        """
         self._date_picker = NSDatePicker.alloc().init()
         self._date_picker.minDate = self.min_date.value
         self._date_picker.maxDate = self.max_date.value

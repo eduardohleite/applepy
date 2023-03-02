@@ -1,7 +1,7 @@
 from rubicon.objc import (
     ObjCClass, ObjCProtocol, ObjCInstance, NSObject, objc_method, objc_classmethod
 )
-from rubicon.objc.runtime import load_library, SEL
+from rubicon.objc.runtime import load_library, SEL, objc_id
 from rubicon.objc.types import NSRect, NSPoint, NSSize
 from enum import Enum
 
@@ -26,13 +26,18 @@ NSStatusBar = ObjCClass('NSStatusBar')
 NSStatusItem = ObjCClass('NSStatusItem')
 NSImage = ObjCClass('NSImage')
 NSAlert = ObjCClass('NSAlert')
+NSOpenPanel = ObjCClass('NSOpenPanel')
+NSSavePanel = ObjCClass('NSSavePanel')
 NSDate = ObjCClass('NSDate')
 NSDateComponents = ObjCClass('NSDateComponents')
 NSCalendar = ObjCClass('NSCalendar')
 NSDatePicker = ObjCClass('NSDatePicker')
-
+NSURL = ObjCClass('NSURL')
+NSDatePickerCell = ObjCClass('NSDatePickerCell')
 
 NSApp = NSApplication.sharedApplication
+
+UTType = ObjCClass('UTType')
 
 
 class NSWindowStyleMask(Enum):

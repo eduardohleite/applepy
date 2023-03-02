@@ -1,13 +1,14 @@
-from typing import Optional, Tuple
+from typing import Optional, Any, Tuple, List
 
-from ..backend.app_kit import NSAlert
-from ..base.types import AlertStyle, AlertResponse, Image
+from ..backend.app_kit import NSAlert, NSOpenPanel, NSSavePanel, UTType, NSURL
+from ..base.types import AlertStyle, AlertResponse, Image, DialogResponse
 
 
 class Alert:
     """ Class that represents a MacOS native Alert modal """
 
-    def __init__(self, style: AlertStyle,
+    def __init__(self, *,
+                       style: AlertStyle,
                        informative_text: str,
                        message_text: str,
                        buttons: Optional[Tuple[str]] = None,
@@ -46,7 +47,8 @@ class Alert:
         return AlertResponse(res)
 
     @classmethod
-    def show_info(cls, informative_text: str,
+    def show_info(cls, *,
+                       informative_text: str,
                        message_text: str,
                        custom_image: Optional[Image]=None) -> AlertResponse:
         """
@@ -62,15 +64,16 @@ class Alert:
         Returns:
             AlertResponse: User response.
         """                       
-        alert = cls(AlertStyle.informational,
-                    informative_text,
-                    message_text,
-                    None,
-                    custom_image)
+        alert = cls(style=AlertStyle.informational,
+                    informative_text=informative_text,
+                    message_text=message_text,
+                    buttons=None,
+                    custom_image=custom_image)
         return alert.show()
 
     @classmethod
-    def show_error(cls, informative_text: str,
+    def show_error(cls, *,
+                        informative_text: str,
                         message_text: str,
                         custom_image: Optional[Image]=None) -> AlertResponse:
         """
@@ -86,15 +89,16 @@ class Alert:
         Returns:
             AlertResponse: User response.
         """        
-        alert = cls(AlertStyle.critical,
-                    informative_text,
-                    message_text,
-                    None,
-                    custom_image)
+        alert = cls(style=AlertStyle.critical,
+                    informative_text=informative_text,
+                    message_text=message_text,
+                    buttons=None,
+                    custom_image=custom_image)
         return alert.show()
 
     @classmethod
-    def show_warning(cls, informative_text: str,
+    def show_warning(cls, *
+                          informative_text: str,
                           message_text: str,
                           custom_image: Optional[Image]=None) -> AlertResponse:
         """
@@ -110,15 +114,16 @@ class Alert:
         Returns:
             AlertResponse: User response.
         """                          
-        alert = cls(AlertStyle.warning,
-                    informative_text,
-                    message_text,
-                    None,
-                    custom_image)
+        alert = cls(style=AlertStyle.warning,
+                    informative_text=informative_text,
+                    message_text=message_text,
+                    buttons=None,
+                    custom_image=custom_image)
         return alert.show()
 
     @classmethod
-    def show_question(cls, title: str,
+    def show_question(cls, *,
+                           title: str,
                            question: str,
                            custom_image: Optional[Image]=None) -> AlertResponse:
         """
@@ -138,15 +143,16 @@ class Alert:
         Returns:
             AlertResponse: User response.
         """                           
-        alert = cls(AlertStyle.informational,
-                    title,
-                    question,
-                    ('Yes', 'No'),
-                    custom_image)
+        alert = cls(style=AlertStyle.informational,
+                    informative_text=title,
+                    message_text=question,
+                    buttons=('Yes', 'No'),
+                    custom_image=custom_image)
         return alert.show()
 
     @classmethod
-    def show_confirmation(cls, title: str,
+    def show_confirmation(cls, *,
+                               title: str,
                                question: str,
                                custom_image: Optional[Image]=None) -> AlertResponse:
         """
@@ -166,9 +172,284 @@ class Alert:
         Returns:
             AlertResponse: User response.
         """      
-        alert = cls(AlertStyle.warning,
-                    title,
-                    question,
-                    ('Ok', 'Cancel'),
-                    custom_image)
-        response = alert.show()
+        alert = cls(style=AlertStyle.warning,
+                    informative_text=title,
+                    message_text=question,
+                    buttons=('Ok', 'Cancel'),
+                    custom_image=custom_image)
+        return alert.show()
+
+
+class SaveDialog:
+    """ Class that represents a Macos native SavePanel """
+
+    def __new__(cls, **kwargs) -> Any:
+        """
+        Instantiate a new `SaveDialog`
+
+        Returns:
+            SaveDialog: self
+        """
+        obj = object.__new__(cls)
+        obj.dialog = NSSavePanel.savePanel()
+        return obj
+
+    def __init__(self,
+                 *,
+                 title: str,
+                 initial_path: Optional[str]=None,
+                 allowed_extensions: Optional[Tuple[str]]=None,
+                 prompt: Optional[str]=None,
+                 message: Optional[str]=None,
+                 can_create_directories: bool=False,
+                 can_show_all_extensions: bool=False,
+                 expanded: bool=False) -> None:
+        """
+        Create a new custom `SaveDialog` modal. For common file saving modals, use one of the shortcut
+        methods in the `FileDialog` class.
+
+        Args:
+            title (str): Title of the modal.
+            initial_path (Optional[str], optional): Initial directory path. Defaults to None.
+            allowed_extensions (Optional[Tuple[str]], optional): Extensions allowed in the modal. Defaults to None.
+            prompt (Optional[str], optional): Modal's prompt button text. Defaults to None.
+            message (Optional[str], optional): Message text of the modal. Defaults to None.
+            can_create_directories (bool, optional): Whether the user can create directories in the modal. Defaults to False.
+            can_show_all_extensions (bool, optional): Whether the modal will allow the user to show all extensions. Defaults to False.
+            expanded (bool, optional): Whether the modal will be expanded. Defaults to False.
+        """
+        self.dialog.title = title
+        self.dialog.message = message or ''
+        self.dialog.canCreateDirectories = can_create_directories
+        self.dialog.canSelectHiddenExtension = can_show_all_extensions
+        self.dialog.expanded = expanded
+
+        if prompt:
+            self.dialog.prompt = prompt
+
+        if allowed_extensions:
+            self.dialog.allowedContentTypes = [UTType.typeWithFilenameExtension(e) for e in allowed_extensions]
+
+        if initial_path:
+            self.dialog.directoryURL = NSURL.fileURLWithPath_isDirectory_(initial_path, True)
+
+    @property
+    def path(self) -> Optional[str]:
+        """
+        Path selected in the dialog, if any.
+
+        Returns:
+            Optional[str]: Path selected in the dialog as string if any. None otherwise.
+        """        
+        return str(self.dialog.URL.path) if self.dialog.URL else None
+
+    def show(self) -> DialogResponse:
+        """
+        Displays the dialog as modal.
+
+        Returns:
+            DialogResponse: The user response
+        """        
+        res = self.dialog.runModal()
+        return DialogResponse(res)
+
+
+class OpenDialog(SaveDialog):
+    """ Class that represents a Macos native OpenPanel """
+
+    def __new__(cls, **kwargs) -> Any:
+        """
+        Instantiate a new `OpenDialog`
+
+        Returns:
+            OpenDialog: self
+        """
+        obj = object.__new__(cls)
+        obj.dialog = NSOpenPanel.openPanel()
+        return obj
+
+    def __init__(self,
+                 *,
+                 title: str,
+                 initial_path: Optional[str]=None,
+                 allowed_extensions: Optional[Tuple[str]]=None,
+                 prompt: Optional[str]=None,
+                 message: Optional[str]=None,
+                 can_choose_files: bool=True,
+                 can_choose_directories: bool=False,
+                 resolve_aliases: bool=True,
+                 allow_multiple_selection: bool=False,
+                 can_create_directories: bool=False,
+                 can_show_all_extensions: bool=False,
+                 expanded: bool=False) -> None:
+        """
+        Create a new custom `OpenDialog` modal. For common file or directory open modals, use one of the shortcut
+        methods in the `FileDialog` class.
+
+        Args:
+            title (str): Title of the modal.
+            initial_path (Optional[str], optional): Initial directory path. Defaults to None.
+            allowed_extensions (Optional[Tuple[str]], optional): Extensions allowed in the modal. Defaults to None.
+            prompt (Optional[str], optional): Modal's prompt button text. Defaults to None.
+            message (Optional[str], optional): Message text of the modal. Defaults to None.
+            can_choose_files (bool, optional): Whether the user can select files in the modal. Defaults to True.
+            can_choose_directories (bool, optional): Whether the user can select directories in the modal. Defaults to False.
+            resolve_aliases (bool, optional): Whether the modal will resolve aliases when selecting directories. Defaults to True.
+            allow_multiple_selection (bool, optional): Whether the user can select multiple files in the modal. Defaults to False.
+            can_create_directories (bool, optional): Whether the user can create directories in the modal. Defaults to False.
+            can_show_all_extensions (bool, optional): Whether the modal will allow the user to show all extensions. Defaults to False.
+            expanded (bool, optional): Whether the modal will be expanded. Defaults to False.
+        """
+        super().__init__(title=title,
+                         initial_path=initial_path,
+                         allowed_extensions=allowed_extensions,
+                         prompt=prompt,
+                         message=message,
+                         can_create_directories=can_create_directories,
+                         can_show_all_extensions=can_show_all_extensions,
+                         expanded=expanded)
+
+        self.dialog.canChooseFiles = can_choose_files
+        self.dialog.canChooseDirectories = can_choose_directories
+        self.dialog.resolvesAliases = resolve_aliases
+        self.dialog.allowsMultipleSelection = allow_multiple_selection
+        self.dialog.resolvesAliases = resolve_aliases
+
+    @property
+    def paths(self) -> List[str]:
+        """
+        Paths selected in the dialog, if any.
+
+        Returns:
+            List[str]: Paths selected in the dialog as string if any. An empty list otherwise.
+        """ 
+        return [str(url.path) for url in self.dialog.URLs] if self.dialog.URLs else [] 
+
+
+class FileDialog:
+    """ Class with utility shortcut methods for creating `OpenDialog` and `SaveDialog` objects for common tasks."""
+
+    @staticmethod
+    def open_file(*,
+                  title: str,
+                  message: Optional[str]=None,
+                  extensions: Optional[Tuple[str]]=None,
+                  initial_path: Optional[str]=None) -> Tuple[DialogResponse, Optional[str]]:
+        """
+        Display an `OpenDialog` modal that allows user to choose a single file.
+
+        Args:
+            title (str): Title of the modal.
+            message (Optional[str], optional): Message text of the modal. Defaults to None.
+            extensions (Optional[Tuple[str]], optional): Extensions allowed in the modal. Defaults to None.
+            initial_path (Optional[str], optional):  Initial directory path. Defaults to None.
+
+        Returns:
+            Tuple[DialogResponse, Optional[str]]: Tuple containing the user's response and the path to the
+            selected file if any. None otherwise.
+        """        
+        dialog = OpenDialog(title=title,
+                            message=message,
+                            allowed_extensions=extensions,
+                            initial_path=initial_path)
+        response = dialog.show()
+        selected = None
+
+        if response == DialogResponse.continue_:
+            selected = dialog.path
+
+        return response, selected
+
+    @staticmethod
+    def open_files(*,
+                   title: str,
+                   message: Optional[str]=None,
+                   extensions: Optional[Tuple[str]]=None,
+                   initial_path: Optional[str]=None) -> Tuple[DialogResponse, List[str]]:
+        """
+        Display an `OpenDialog` modal that allows user to choose multiple files.
+
+        Args:
+            title (str): Title of the modal.
+            message (Optional[str], optional): Message text of the modal. Defaults to None.
+            extensions (Optional[Tuple[str]], optional): Extensions allowed in the modal. Defaults to None.
+            initial_path (Optional[str], optional): Initial directory path. Defaults to None.
+
+        Returns:
+            Tuple[DialogResponse, List[str]]: Tuple containing the user's response and a list of the paths
+            to the selected files if any. An empty list otherwise.
+        """        
+        dialog = OpenDialog(title=title,
+                            message=message,
+                            allow_multiple_selection=True,
+                            allowed_extensions=extensions,
+                            initial_path=initial_path)
+        response = dialog.show()
+        selected = []
+
+        if response == DialogResponse.continue_:
+            selected = dialog.paths
+
+        return response, selected
+
+    @staticmethod
+    def open_dir(*,
+                 title: str,
+                 message: Optional[str]=None,
+                 initial_path: Optional[str]=None) -> Tuple[DialogResponse, Optional[str]]:
+        """
+        Display an `OpenDialog` modal that allows user to choose a single directory.
+
+        Args:
+            title (str): Title of the modal.
+            message (Optional[str], optional): Message text of the modal. Defaults to None.
+            initial_path (Optional[str], optional):  Initial directory path. Defaults to None.
+
+        Returns:
+            Tuple[DialogResponse, Optional[str]]: Tuple containing the user's response and the path to the
+            selected folder if any. None otherwise.
+        """        
+        dialog = OpenDialog(title,
+                            can_choose_files=False,
+                            can_choose_directories=True,
+                            can_create_directories=True,
+                            message=message,
+                            initial_path=initial_path)
+        response = dialog.show()
+        selected = None
+
+        if response == DialogResponse.continue_:
+            selected = dialog.path
+
+        return response, selected
+
+    @staticmethod
+    def save_file(*,
+                  title: str,
+                  message: Optional[str]=None,
+                  extensions: Optional[Tuple[str]]=None,
+                  initial_path: Optional[str]=None) -> Tuple[DialogResponse, Optional[str]]:
+        """
+        Display an `SaveDialog` modal that allows user to choose a single file.
+
+        Args:
+            title (str): Title of the modal.
+            message (Optional[str], optional): Message text of the modal. Defaults to None.
+            extensions (Optional[Tuple[str]], optional): Extensions allowed in the modal. Defaults to None.
+            initial_path (Optional[str], optional):  Initial directory path. Defaults to None.
+
+        Returns:
+            Tuple[DialogResponse, Optional[str]]: Tuple containing the user's response and the path to the
+            selected file if any. None otherwise.
+        """        
+        dialog = SaveDialog(title=title,
+                            message=message,
+                            allowed_extensions=extensions,
+                            initial_path=initial_path)
+        response = dialog.show()
+        selected = []
+
+        if response == DialogResponse.continue_:
+            selected = dialog.path
+
+        return response, selected

@@ -80,8 +80,10 @@ class Bindable(property):
         return res
 
     def __set__(self, target, new_val, *args, **kwargs) -> None:
-        super().__set__(target, new_val, *args, **kwargs)
-        self.on_changed.emit(new_val)
+        cur_val = self.__get__(target, *args, **kwargs)
+        if cur_val != new_val:
+            super().__set__(target, new_val, *args, **kwargs)
+            self.on_changed.emit(new_val)
 
     def setter(self, __fset: Callable[[Any, Any], None]) -> property:
         res = super().setter(__fset)
@@ -186,10 +188,11 @@ class Binding(AbstractBinding):
     def value(self, new_val):
         cur_val = self.bindable.fget(self.instance)
         w_type = self.bindable.type_
-        try:
-            new_val = w_type(new_val)
-        except ValueError:
-            new_val = cur_val
+        if not issubclass(w_type, BindableMixin):
+            try:
+                new_val = w_type(new_val)
+            except ValueError:
+                new_val = cur_val
         self.bindable.__set__(self.instance, new_val)
 
 
