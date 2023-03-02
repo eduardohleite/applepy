@@ -80,8 +80,10 @@ class Bindable(property):
         return res
 
     def __set__(self, target, new_val, *args, **kwargs) -> None:
-        super().__set__(target, new_val, *args, **kwargs)
-        self.on_changed.emit(new_val)
+        cur_val = self.__get__(target, *args, **kwargs)
+        if cur_val != new_val:
+            super().__set__(target, new_val, *args, **kwargs)
+            self.on_changed.emit(new_val)
 
     def setter(self, __fset: Callable[[Any, Any], None]) -> property:
         res = super().setter(__fset)

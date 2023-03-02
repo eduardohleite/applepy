@@ -1,13 +1,15 @@
 from typing import Union, Optional, Callable
 from uuid import uuid4
+from ctypes import POINTER, c_double
 
 from ... import View, Date
 from ...backend.app_kit import (
-    NSObject,
     objc_id,
+    objc_method,
+    ObjCInstance,
+    NSObject,
     NSDatePicker,
-    NSDatePickerElementFlags,
-    objc_method
+    NSDatePickerElementFlags
 )
 from ...base.binding import AbstractBinding, bindable
 from ...base.utils import try_call
@@ -22,7 +24,7 @@ class DatePicker(Control):
     @date.setter
     def date(self, val: Date) -> None:
         self._date = val
-        if self._date_picker and val.value != self._date_picker.dateValue:
+        if self._date_picker:
             self._date_picker.dateValue = self._date.value
 
     def __init__(self, *, date: Union[Date, AbstractBinding],
@@ -51,12 +53,13 @@ class DatePicker(Control):
 
         @objc_method
         def datePickerCell_validateProposedDateValue_timeInterval_(_self, 
-                                                                   datePickerCell: objc_id,
-                                                                   proposedDateValue: int,
-                                                                   proposedTimeInterval: float):
-            self.date = Date(self._date_picker.dateValue)
+                                                                   datePickerCell,
+                                                                   proposedDateValue: POINTER(objc_id),
+                                                                   proposedTimeInterval: POINTER(c_double)):
+            new_date_value = ObjCInstance(proposedDateValue.contents)
+            self.date = Date.from_value(new_date_value)
             if self.bound_date:
-                self.bound_date.value = self._date
+                self.bound_date.value = Date.from_value(new_date_value)
 
             try_call(on_date_changed)
 
