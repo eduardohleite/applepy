@@ -1,11 +1,21 @@
 from enum import Enum
 
-from ...backend.app_kit import NSImage
+from ..errors import NotSupportedError
 from ..binding import BindableMixin
+from ...backend import _IOS, _MACOS
+
+if _MACOS:
+    from ...backend.app_kit import NSImage
+
+if _IOS:
+    from ...backend.ui_kit import NSImage
 
 
 class Image(BindableMixin):
     def __init__(self, image: NSImage) -> None:
+        if _IOS:
+            raise NotSupportedError()
+
         self._image = image
 
     @classmethod

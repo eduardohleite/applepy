@@ -1,5 +1,11 @@
 from .. import Scene
-from ..backend.app_kit import NSObject
+from ..backend import _MACOS, _IOS
+
+if _MACOS:
+    from ..backend.app_kit import NSObject
+
+if _IOS:
+    from ..backend.ui_kit import NSObject
 
 
 class EmptyScene(Scene):

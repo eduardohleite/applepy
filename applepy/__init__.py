@@ -25,4 +25,4 @@ from .base.binding import (
     AbstractBinding,
     BindableMixin
 )
-from .views.timer import Timer
+# from .views.timer import Timer # TODO

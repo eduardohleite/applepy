@@ -1,5 +1,11 @@
 from ...base.binding import BindableMixin
-from ...backend.app_kit import NSColor
+from ...backend import _IOS, _MACOS
+
+if _MACOS:
+    from ...backend.app_kit import NSColor
+
+if _IOS:
+    from ...backend.ui_kit import NSColor
 
 
 class Color(BindableMixin):

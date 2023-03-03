@@ -1,15 +1,21 @@
 from typing import Union, Optional, Callable
 from uuid import uuid4
 
+from ...backend import _MACOS, _IOS
 from .control import Control
-from ...backend.app_kit import NSTextField, NSObject, objc_method
 from ...base.utils import try_call
 from ...base.transform_mixins import Placeholder, TextColor, TextControl
 from ... import AbstractBinding, bindable
 
+if _MACOS:
+    from ...backend.app_kit import NSTextField, UILabel, NSObject, objc_method
+
+if _IOS:
+    from ...backend.ui_kit import NSTextField, UILabel, NSObject, objc_method
+
 
 class Label(Control,
-            TextColor,
+            #TextColor,
             TextControl):
 
     """ Control that generates a native MacOS Label. """
@@ -34,7 +40,7 @@ class Label(Control,
         """        
         Control.__init__(self)
         TextControl.__init__(self, text)
-        TextColor.__init__(self)
+        #TextColor.__init__(self)
 
         self._label = None
 
@@ -56,11 +62,16 @@ class Label(Control,
         Returns:
             Label: self
         """
-        self._label = NSTextField.labelWithString_(self.text)
-        
+        if _MACOS:
+            self._label = NSTextField.labelWithString_(self.text)
+
+        if _IOS:
+            self._label = UILabel.alloc().init()
+            self._label.text = self.text
+
         Control.parse(self)
         TextControl.parse(self, TextControl)
-        TextColor.parse(self, TextColor)
+        #TextColor.parse(self, TextColor)
 
         return self
 
