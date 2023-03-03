@@ -1,8 +1,8 @@
 from typing import Union, Optional, Tuple, Callable
 
 from ...base.types import Color, Image, ImagePosition
-from ... import AbstractBinding, bindable
 from ...base.utils import try_call
+from ..binding import AbstractBinding, bindable
 from .base import TransformMixin
 
 

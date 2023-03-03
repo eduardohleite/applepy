@@ -1,6 +1,7 @@
 from typing import Union
 
-from ... import AbstractBinding, Color
+from ..types import Color
+from ..binding import AbstractBinding
 
 
 class BackgroundColor:

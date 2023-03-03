@@ -5,7 +5,9 @@ from ...base.transform_mixins import (
     BezelColor,
     ControlWithState,
     KeyBindable,
-    ImageControl
+    ImageControl,
+    Width,
+    Height
 )
 from ...backend.app_kit import NSButton
 from ...base.binding import AbstractBinding
@@ -13,7 +15,6 @@ from ...base.app import get_current_app
 from ...base.utils import try_call
 from ...base.types import Image, ImagePosition
 from .control import Control
-
 
 class Button(Control,
              TitledControl,

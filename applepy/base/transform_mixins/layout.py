@@ -1,8 +1,8 @@
 from typing import Union, Optional
 from rubicon.objc.types import NSEdgeInsets
 
-from ... import AbstractBinding, Padding, Alignment
-from ..binding import bindable
+from ..types import Padding, Alignment
+from ..binding import AbstractBinding, bindable
 from .base import TransformMixin
 
 

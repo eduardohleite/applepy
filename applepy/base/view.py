@@ -3,13 +3,18 @@ from typing import Callable, List, Optional, Union, Tuple
 
 from .app import get_current_app
 from .mixins import StackMixin, Modifiable, ChildMixin
-from ..base.binding import AbstractBinding
-from ..backend.app_kit import NSView, NSLayoutConstraint
+from ..base.binding import AbstractBinding, bindable
+from ..backend.app_kit import NSView
 from ..base.types import Padding
+from ..base.transform_mixins import Width, Height
 
 
-class View(ABC, Modifiable, ChildMixin):
-    @property
+class View(ABC,
+           Modifiable,
+           ChildMixin,
+           Width,
+           Height):
+    @bindable(str)
     def tooltip(self) -> Optional[str]:
         return self._tooltip
 
@@ -17,28 +22,6 @@ class View(ABC, Modifiable, ChildMixin):
     def tooltip(self, val: Optional[str]) -> None:
         self._tooltip = val
         self.ns_object.toolTip = val
-
-    @property
-    def grab_constraint(self) -> Optional[Padding]:
-        return self._grab_constraint
-
-    @grab_constraint.setter
-    def grab_constraint(self, val: Optional[Padding]) -> None:
-        self._grab_constraint = val
-
-        if val is not None:
-            self.ns_object.translatesAutoresizingMaskIntoConstraints = False
-            self._activated_constraints = [
-                self.ns_object.leadingAnchor.constraintEqualToSystemSpacingAfterAnchor_(self.parent.leadingAnchor, 1.),
-                self.ns_object.trailingAnchor.constraintEqualToSystemSpacingAfterAnchor_(self.parent.trailingAnchor, 1.),
-                self.ns_object.topAnchor.constraintEqualToSystemSpacingAfterAnchor_(self.parent.topAnchor, 1.),
-                self.ns_object.bottomAnchor.constraintEqualToSystemSpacingAfterAnchor_(self.parent.bottomAnchor, 1.)
-            ]
-
-        else:
-            self.ns_object.translatesAutoresizingMaskIntoConstraints = True
-            if self._activated_constraints:
-                NSLayoutConstraint.deactivateConstraints_(self._activated_constraints)
 
     def __init__(self, valid_parent_types: Optional[Tuple[type]]=None) -> None:
         self.parent = get_current_app().get()
@@ -54,6 +37,8 @@ class View(ABC, Modifiable, ChildMixin):
 
         Modifiable.__init__(self)
         ChildMixin.__init__(self, valid_parent_types)
+        Width.__init__(self)
+        Height.__init__(self)
 
         # register itself in parent's stack
         # TODO: is there a better way to not stack a view with a custom body?
