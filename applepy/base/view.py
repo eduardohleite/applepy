@@ -4,9 +4,14 @@ from typing import Callable, List, Optional, Union, Tuple
 from .app import get_current_app
 from .mixins import StackMixin, Modifiable, ChildMixin
 from ..base.binding import AbstractBinding, bindable
-from ..backend.app_kit import NSView
-from ..base.types import Padding
 from ..base.transform_mixins import Width, Height
+from ..backend import _MACOS, _IOS
+
+if _MACOS:
+    from ..backend.app_kit import NSView, UIView
+
+if _IOS:
+    from ..backend.ui_kit import NSView, UIView
 
 
 class View(ABC,
@@ -54,18 +59,15 @@ class View(ABC,
         return Modifiable.parse(self)
 
     @abstractmethod
-    def get_ns_object(self) -> NSView:
+    def get_ns_object(self) -> Union[NSView, UIView]:
         pass
 
     @property
-    def ns_object(self) -> NSView:
+    def ns_object(self) -> Union[NSView, UIView]:
         return self.get_ns_object()
 
     def _on_tooltip_changed(self, signal, sender, event):
         self.tooltip = self.bound_tooltip.value
-
-    def _on_grab_constraint_changed(self, signal, sender, event):
-        self.grab_constraint = self.bound_grab_constraint.value
 
     def set_tooltip(self, tooltip: Union[Optional[str], AbstractBinding]=None):
         def __modifier():
@@ -75,23 +77,6 @@ class View(ABC,
                 self.tooltip = tooltip.value
             else:
                 self.tooltip = tooltip
-
-        self._modifiers.append(__modifier)
-
-        return self
-
-    # TODO: this is incomplete
-    def grab(self, target=None, grab_constraint: Union[Optional[Padding], AbstractBinding]=None):
-        if not target:
-            target = self.parent
-
-        def __modifier():
-            if isinstance(grab_constraint, AbstractBinding):
-                self.bound_grab_constraint = grab_constraint
-                self.bound_grab_constraint.on_changed.connect(self._on_grab_constraint_changed)
-                self.grab_constraint = grab_constraint.value
-            else:
-                self.grab_constraint = grab_constraint
 
         self._modifiers.append(__modifier)
 

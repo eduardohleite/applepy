@@ -2,7 +2,13 @@ from datetime import datetime
 from typing import Optional
 
 from ...base.binding import BindableMixin
-from ...backend.app_kit import NSDate, ObjCInstance
+from ...backend import _MACOS, _IOS
+
+if _MACOS:
+    from ...backend.app_kit import NSDate, ObjCInstance
+
+if _IOS:
+    from ...backend.ui_kit import NSDate, ObjCInstance
 
 
 class Date(BindableMixin):

@@ -19,11 +19,15 @@ if _MACOS:
 if _IOS:
     from ..backend.ui_kit import (
         NSObject,
+        NSMenuItem,
+        NSButton,
+        UIWindow,
         UIApplication,
         UIApplicationMain,
         NSStringFromClass,
         ObjCInstance,
         objc_method,
+        objc_property,
         SEL
     )
 
@@ -105,9 +109,12 @@ if _MACOS:
 
 if _IOS:
     class _TouchApplicationController(NSObject):
+        window = objc_property()
+
         @objc_method
-        def application_didFinishLaunchingWithOptions_(self, app, options):
+        def application_didFinishLaunchingWithOptions_(self, app, options) -> bool:
             _current_app.setup_scene()
+            return True
 
 
 class App(ABC, StackMixin):
@@ -131,9 +138,14 @@ class App(ABC, StackMixin):
                 NSApp.activateIgnoringOtherApps_(True)
         
         if _IOS:
-            from ..scenes import PageController
-            if isinstance(self._scene, PageController):
-                UIApplication.sharedApplication.window.rootViewController = self._scene.view_controller
+            from ..scenes import ViewController
+            from ..backend.ui_kit import UIColor, UIScreen
+
+            if isinstance(self._scene, ViewController):
+                self._controller.window = UIWindow.alloc().initWithFrame(UIScreen.mainScreen.bounds)
+                self._controller.window.rootViewController = self._scene.view_controller
+                self._controller.window.backgroundColor = UIColor.yellowColor
+                self._controller.window.makeKeyAndVisible()
 
     @abstractmethod
     def body(self):
