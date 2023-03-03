@@ -1,16 +1,31 @@
 from abc import ABC, abstractmethod
 from typing import Callable, Union, Any
 
+from ..backend import _IOS, _MACOS
 from .utils import try_call
-from ..backend.app_kit import (
-    NSObject,
-    NSApp,
-    NSMenuItem,
-    NSButton,
-    NSStatusBar,
-    objc_method,
-    SEL
-)
+from .errors import NotSupportedError
+
+if _MACOS:
+    from ..backend.app_kit import (
+        NSObject,
+        NSApp,
+        NSMenuItem,
+        NSButton,
+        NSStatusBar,
+        objc_method,
+        SEL
+    )
+
+if _IOS:
+    from ..backend.ui_kit import (
+        NSObject,
+        UIApplication,
+        UIApplicationMain,
+        NSStringFromClass,
+        ObjCInstance,
+        objc_method,
+        SEL
+    )
 
 
 _current_app = None
@@ -77,31 +92,48 @@ class StackMixin:
         """        
         return ptr in self._stack
 
+if _MACOS:
+    class _ApplicationController(NSObject):
+        @objc_method
+        def applicationDidFinishLaunching_(self, notification):
+            _current_app.setup_scene()
 
-class _ApplicationController(NSObject):
-    @objc_method
-    def applicationDidFinishLaunching_(self, notification):
-        _current_app.setup_scene()
+        @objc_method
+        def menuAction_(self, menu_item):
+            _current_app.invoke_action(menu_item)
 
-    @objc_method
-    def menuAction_(self, menu_item):
-        _current_app.invoke_action(menu_item)
+
+if _IOS:
+    class _TouchApplicationController(NSObject):
+        @objc_method
+        def application_didFinishLaunchingWithOptions_(self, app, options):
+            _current_app.setup_scene()
 
 
 class App(ABC, StackMixin):
     def __init__(self) -> None:
         StackMixin.__init__(self)
 
-        self._controller = _ApplicationController.alloc().init()
-        NSApp.delegate = self._controller
+        if _MACOS:
+            self._controller = _ApplicationController.alloc().init()
+            NSApp.delegate = self._controller
+        
+        if _IOS:
+            self._controller = _TouchApplicationController.alloc().init()
 
         self._actions = {}
 
     def _register_scene(self) -> None:
-        from ..scenes import Window
-        if isinstance(self._scene, Window):
-            self._controller.mainWindow = self._scene.window
-            NSApp.activateIgnoringOtherApps_(True)
+        if _MACOS:
+            from ..scenes import Window
+            if isinstance(self._scene, Window):
+                self._controller.mainWindow = self._scene.window
+                NSApp.activateIgnoringOtherApps_(True)
+        
+        if _IOS:
+            from ..scenes import PageController
+            if isinstance(self._scene, PageController):
+                UIApplication.sharedApplication.window.rootViewController = self._scene.view_controller
 
     @abstractmethod
     def body(self):
@@ -111,7 +143,11 @@ class App(ABC, StackMixin):
         global _current_app
         _current_app = self
 
-        NSApp.run()
+        if _MACOS:
+            NSApp.run()
+
+        if _IOS:
+            UIApplicationMain(0, None, None, ObjCInstance(NSStringFromClass(_TouchApplicationController)))
 
     def setup_scene(self) -> None:
         self._scene = self.body().parse()
@@ -126,7 +162,11 @@ class App(ABC, StackMixin):
         try_call(action)
 
     def quit(self):
-        NSApp.terminate_(None)
+        if _MACOS:
+            NSApp.terminate_(None)
+
+        if _IOS:
+            raise NotSupportedError()
 
 
 class StatusBarApp(App):
@@ -137,7 +177,10 @@ class StatusBarApp(App):
     def __init__(self) -> None:
         """
         Initialize a new `StatusBarApp` instance.
-        """        
+        """
+        if _IOS:
+            raise NotSupportedError()
+
         super().__init__()
         self.status_bar_icon = NSStatusBar.systemStatusBar.statusItemWithLength_(-1.)
 
@@ -148,6 +191,5 @@ def get_current_app() -> App:
 
     Returns:
         App: Current running `App` instance.
-    """    
+    """
     return _current_app
-
