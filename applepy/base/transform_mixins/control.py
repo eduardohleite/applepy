@@ -1,5 +1,6 @@
 from typing import Union, Optional, Tuple, Callable
 
+from ...backend import _MACOS, _IOS
 from ...base.types import Color, Image, ImagePosition
 from ...base.utils import try_call
 from ..binding import AbstractBinding, bindable
@@ -188,7 +189,11 @@ class TextColor(TransformMixin):
         TextColor._set(self)
 
     def __init__(self) -> None:
-        self._text_color = Color.text_color
+        if _MACOS:
+            self._text_color = Color.text_color
+
+        if _IOS:
+            self._text_color = Color.light_text_color
 
     def _on_text_color_changed(self, signal, sender, event):
         self.text_color = self.bound_text_color.value

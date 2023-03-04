@@ -15,7 +15,7 @@ if _IOS:
 
 
 class Label(Control,
-            #TextColor,
+            TextColor,
             TextControl):
 
     """ Control that generates a native MacOS Label. """
@@ -40,7 +40,7 @@ class Label(Control,
         """        
         Control.__init__(self)
         TextControl.__init__(self, text)
-        #TextColor.__init__(self)
+        TextColor.__init__(self)
 
         self._label = None
 
@@ -71,7 +71,7 @@ class Label(Control,
 
         Control.parse(self)
         TextControl.parse(self, TextControl)
-        #TextColor.parse(self, TextColor)
+        TextColor.parse(self, TextColor)
 
         return self
 

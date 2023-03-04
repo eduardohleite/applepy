@@ -21,7 +21,7 @@ if _IOS:
 
 
 class StackView(StackedView,
-                #BackgroundColor,
+                BackgroundColor,
                 LayoutSpacing,
                 LayoutPadding,
                 LayoutAlignment):
@@ -63,7 +63,7 @@ class StackView(StackedView,
             self._stack_view.distribution = val.value
 
     def __init__(self, *, orientation: StackOrientation,
-                          alignment: Alignment=Alignment.left,
+                          alignment: Optional[Alignment]=None,
                           distribution: Optional[StackDistribution]=None) -> None:
         """
         Add a new `StackView` view, which lays out child views in a horizontal or vertical
@@ -93,8 +93,15 @@ class StackView(StackedView,
             alignment (Alignment, optional): The alignment of the stacked views. Defaults to Alignment.left.
             distribution (StackDistribution, optional): The distribution of the stacked views.
         """
+        if not alignment:
+            if _MACOS:
+                alignment = Alignment.macos_left
+
+            if _IOS:
+                alignment = Alignment.ios_leading
+
         StackedView.__init__(self, (Scene, StackedView))
-        #BackgroundColor.__init__(self)
+        BackgroundColor.__init__(self)
         LayoutPadding.__init__(self)
         LayoutSpacing.__init__(self)
         LayoutAlignment.__init__(self, default_alignment=alignment)
@@ -134,9 +141,6 @@ class StackView(StackedView,
             self._stack_view = UIStackView.alloc().init()
             self._stack_view.axis = self.orientation.value
             self._stack_view.distribution = self.distribution.value
-            from ...backend.ui_kit import UIColor
-
-            self._stack_view.backgroundColor = UIColor.greenColor
 
         if isinstance(self.parent, StackView):
             self.parent.ns_object.addArrangedSubview_(self.ns_object)
@@ -144,7 +148,7 @@ class StackView(StackedView,
             self.parent.set_content_view(self.ns_object)
 
         StackedView.parse(self)
-        #LayoutAlignment.parse(self, LayoutAlignment)
+        LayoutAlignment.parse(self, LayoutAlignment)
         LayoutSpacing.parse(self, LayoutSpacing)
         Modifiable.parse(self)
     
@@ -154,7 +158,7 @@ class StackView(StackedView,
 class HorizontalStack(StackView):
     """ Layout view horizontally in a stack. """
 
-    def __init__(self, *, alignment: Alignment=Alignment.center_y,
+    def __init__(self, *, alignment: Optional[Alignment]=None,
                           distribution: Optional[StackDistribution]=None) -> None:
         """
         Shortcut to create a horizontal StackView.
@@ -180,6 +184,13 @@ class HorizontalStack(StackView):
             alignment (Alignment, optional): The alignment of the stacked views. Defaults to Alignment.center_y.
             distribution (StackDistribution, optional): The distribution of the stacked views. Defaults to StackDistribution.fill.
         """
+        if not alignment:
+            if _MACOS:
+                alignment = Alignment.macos_center_y
+
+            if _IOS:
+                alignment = Alignment.ios_center
+
         super().__init__(orientation=StackOrientation.horizontal,
                          alignment=alignment,
                          distribution=distribution)
@@ -188,7 +199,7 @@ class HorizontalStack(StackView):
 class VerticalStack(StackView):
     """ Layout view vertically in a stack. """
 
-    def __init__(self, *, alignment: Alignment=Alignment.center_x,
+    def __init__(self, *, alignment: Optional[Alignment]=None,
                           distribution: Optional[StackDistribution]=None) -> None:
         """
         Shortcut to create a vertical StackView.
@@ -214,6 +225,13 @@ class VerticalStack(StackView):
             alignment (Alignment, optional): The alignment of the stacked views. Defaults to Alignment.center_y.
             distribution (StackDistribution, optional): The distribution of the stacked views. Defaults to StackDistribution.fill.
         """
+        if not alignment:
+            if _MACOS:
+                alignment = Alignment.macos_center_x
+
+            if _IOS:
+                alignment = Alignment.ios_center
+
         super().__init__(orientation=StackOrientation.vertical,
                          alignment=alignment,
                          distribution=distribution)

@@ -4,20 +4,29 @@ from ..binding import BindableMixin
 
 
 class Alignment(BindableMixin, Enum):
-    left = 1
-    right = 2
-    top = 3
-    bottom = 4
-    leading = 5
-    trailing = 6
-    width = 7
-    height = 8
-    center_x = 9
-    center_y = 10
-    last_baseline = 11
-    first_baseline = 12
-    left_marging = 13
-    right_margin = 14
+    macos_left = 1
+    macos_right = 2
+    macos_top = 3
+    macos_bottom = 4
+    macos_leading = 5
+    macos_trailing = 6
+    macos_width = 7
+    macos_height = 8
+    macos_center_x = 9
+    macos_center_y = 10
+    macos_last_baseline = 11
+    macos_first_baseline = 12
+    macos_left_marging = 13
+    macos_right_margin = 14
+
+    ios_fill = 0
+    ios_center = 3
+    ios_leading = 1
+    ios_trailing = 4
+    ios_top = ios_leading
+    ios_bottom = ios_trailing
+    ios_first_baseline = 2
+    ios_last_baseline = 5
 
 
 class StackOrientation(BindableMixin, Enum):

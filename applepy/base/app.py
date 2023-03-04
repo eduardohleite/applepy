@@ -22,7 +22,7 @@ if _IOS:
         NSMenuItem,
         NSButton,
         UIWindow,
-        UIApplication,
+        UIScreen,
         UIApplicationMain,
         NSStringFromClass,
         ObjCInstance,
@@ -139,27 +139,24 @@ class App(ABC, StackMixin):
         
         if _IOS:
             from ..scenes import ViewController
-            from ..backend.ui_kit import UIColor, UIScreen
-
             if isinstance(self._scene, ViewController):
                 self._controller.window = UIWindow.alloc().initWithFrame(UIScreen.mainScreen.bounds)
                 self._controller.window.rootViewController = self._scene.view_controller
-                self._controller.window.backgroundColor = UIColor.yellowColor
                 self._controller.window.makeKeyAndVisible()
 
     @abstractmethod
     def body(self):
         return self
 
-    def run(self) -> None:
+    def run(self) -> int:
         global _current_app
         _current_app = self
 
         if _MACOS:
-            NSApp.run()
+            return NSApp.run()
 
         if _IOS:
-            UIApplicationMain(0, None, None, ObjCInstance(NSStringFromClass(_TouchApplicationController)))
+            return UIApplicationMain(0, None, None, ObjCInstance(NSStringFromClass(_TouchApplicationController)))
 
     def setup_scene(self) -> None:
         self._scene = self.body().parse()

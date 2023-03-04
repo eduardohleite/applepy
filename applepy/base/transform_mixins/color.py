@@ -2,6 +2,7 @@ from typing import Union
 
 from ..types import Color
 from ..binding import AbstractBinding
+from ...backend import _MACOS, _IOS
 
 
 class BackgroundColor:
@@ -15,7 +16,11 @@ class BackgroundColor:
         self.ns_object.backgroundColor = val.value
 
     def __init__(self) -> None:
-        self._background_color = Color.black
+        if _MACOS:
+            self._background_color = Color.control_background_color
+
+        if _IOS:
+            self._background_color = Color.system_background_color
 
     def _on_background_color_changed(self, signal, sender, event):
         self._background_color = self.bound_background_color.value

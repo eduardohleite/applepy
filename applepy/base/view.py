@@ -21,6 +21,7 @@ class View(ABC,
            Height):
     @bindable(str)
     def tooltip(self) -> Optional[str]:
+        # does iOS have tooltip?
         return self._tooltip
 
     @tooltip.setter
