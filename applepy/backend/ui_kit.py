@@ -1,4 +1,5 @@
 from typing import Any
+from enum import Enum
 from rubicon.objc import (
     ObjCClass,
     ObjCProtocol,
@@ -39,6 +40,9 @@ UIPageViewController = ObjCClass('UIPageViewController')
 UIStackView = ObjCClass('UIStackView')
 UILabel = ObjCClass('UILabel')
 UIColor = ObjCClass('UIColor')
+UITextField = ObjCClass('UITextField')
+UIButton = ObjCClass('UIButton')
+UIButtonConfiguration = ObjCClass('UIButtonConfiguration')
 
 UIApplicationMain = uilib.UIApplicationMain
 UIApplicationMain.restype = c_int
@@ -47,3 +51,48 @@ UIApplicationMain.argtypes = [c_int, c_char_p, objc_id, objc_id]
 NSStringFromClass = Foundation.NSStringFromClass
 NSStringFromClass.restype = objc_id
 NSStringFromClass.argtypes = [objc_id]
+
+
+class UIButtonType(Enum):
+    UIButtonTypeCustom = 0
+    UIButtonTypeSystem = 1
+    UIButtonTypeDetailDisclosure = 2
+    UIButtonTypeInfoLight = 3
+    UIButtonTypeInfoDark = 4
+    UIButtonTypeContactAdd = 5
+    UIButtonTypePlain = 6
+    UIButtonTypeClose = 7
+
+
+class UIControlState(Enum):
+    UIControlStateNormal = 0
+    UIControlStateHighlighted = 1 << 0
+    UIControlStateDisabled = 1 << 1
+    UIControlStateSelected = 1 << 2
+    UIControlStateFocused = 1 << 3
+    UIControlStateApplication = 0x00FF0000
+    UIControlStateReserved = 0xFF000000
+
+
+class UIControlEvents(Enum):
+    UIControlEventTouchDown = 1 <<  0
+    UIControlEventTouchDownRepeat = 1 <<  1
+    UIControlEventTouchDragInside = 1 <<  2
+    UIControlEventTouchDragOutside = 1 <<  3
+    UIControlEventTouchDragEnter = 1 <<  4
+    UIControlEventTouchDragExit = 1 <<  5
+    UIControlEventTouchUpInside = 1 <<  6
+    UIControlEventTouchUpOutside = 1 <<  7
+    UIControlEventTouchCancel = 1 <<  8
+    UIControlEventValueChanged = 1 << 12
+    UIControlEventMenuActionTriggered = 1 << 14
+    UIControlEventPrimaryActionTriggered = 1 << 13
+    UIControlEventEditingDidBegin = 1 << 16
+    UIControlEventEditingChanged = 1 << 17
+    UIControlEventEditingDidEnd = 1 << 18
+    UIControlEventEditingDidEndOnExit = 1 << 19
+    UIControlEventAllTouchEvents = 0x00000FFF
+    UIControlEventAllEditingEvents = 0x000F0000
+    UIControlEventApplicationReserved = 0x0F000000
+    UIControlEventSystemReserved = 0xF0000000
+    UIControlEventAllEvents = 0xFFFFFFFF

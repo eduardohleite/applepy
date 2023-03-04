@@ -101,7 +101,7 @@ class Color(BindableMixin):
             raise NotSupportedError()
         
         if _IOS:
-            return cls(UIColor.systemMintColor)
+            return cls(UIColor.systemMintColor())
 
     @classmethod
     @property
@@ -348,7 +348,7 @@ class Color(BindableMixin):
             return cls(NSColor.labelColor)
         
         if _IOS:
-            return cls(UIColor.labelColor)
+            return cls(UIColor.labelColor())
 
     @classmethod
     @property
@@ -505,7 +505,7 @@ class Color(BindableMixin):
             raise NotSupportedError()
     
         if _IOS:
-            return cls(UIColor.systemBackgroundColor)
+            return cls(UIColor.systemBackgroundColor())
         
     @classmethod
     @property

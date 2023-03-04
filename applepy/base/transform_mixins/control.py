@@ -6,6 +6,9 @@ from ...base.utils import try_call
 from ..binding import AbstractBinding, bindable
 from .base import TransformMixin
 
+if _IOS:
+    from ...backend.ui_kit import UIControlState
+
 
 class TitledControl(TransformMixin):
     @bindable(str)
@@ -30,7 +33,11 @@ class TitledControl(TransformMixin):
 
     def _set(self) -> None:
         if self.ns_object:
-            self.ns_object.title = self._title
+            if _MACOS:
+                self.ns_object.title = self._title
+
+            if _IOS:
+                self.ns_object.setTitle_forState_(self._title, UIControlState.UIControlStateNormal)
 
     def set_title(self, title: Union[str, AbstractBinding]):
         def __modifier():
@@ -123,7 +130,11 @@ class BezelColor(TransformMixin):
         BezelColor._set(self)
 
     def __init__(self) -> None:
-        self._bezel_color = Color.control_color
+        if _MACOS:
+            self._bezel_color = Color.control_color
+
+        if _IOS:
+            self._bezel_color = Color.secundary_system_background_color
 
     def _on_bezel_color_changed(self, signal, sender, event):
         self.bezel_color = self.bound_bezel_color.value
@@ -188,17 +199,14 @@ class TextColor(TransformMixin):
         self._text_color = val
         TextColor._set(self)
 
-    def __init__(self) -> None:
-        if _MACOS:
-            self._text_color = Color.text_color
-
-        if _IOS:
-            self._text_color = Color.light_text_color
+    def __init__(self, default_color: Color=Color.label_color) -> None:
+        self._text_color = default_color
 
     def _on_text_color_changed(self, signal, sender, event):
         self.text_color = self.bound_text_color.value
 
     def _set(self) -> None:
+        print(self.text_color.value)
         self.ns_object.textColor = self.text_color.value
 
     def set_text_color(self, text_color: Union[Color, AbstractBinding]):

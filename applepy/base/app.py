@@ -12,6 +12,7 @@ if _MACOS:
         NSMenuItem,
         NSButton,
         NSStatusBar,
+        UIButton,
         objc_method,
         SEL
     )
@@ -23,6 +24,7 @@ if _IOS:
         NSButton,
         UIWindow,
         UIScreen,
+        UIButton,
         UIApplicationMain,
         NSStringFromClass,
         ObjCInstance,
@@ -115,6 +117,10 @@ if _IOS:
         def application_didFinishLaunchingWithOptions_(self, app, options) -> bool:
             _current_app.setup_scene()
             return True
+        
+        @objc_method
+        def menuAction_(self, menu_item):
+            _current_app.invoke_action(menu_item)
 
 
 class App(ABC, StackMixin):
@@ -162,11 +168,11 @@ class App(ABC, StackMixin):
         self._scene = self.body().parse()
         self._register_scene()
 
-    def register_action(self, caller: Union[NSMenuItem, NSButton], action: Callable) -> SEL:
+    def register_action(self, caller: Union[NSMenuItem, NSButton, UIButton], action: Callable) -> SEL:
         self._actions[caller] = action
         return SEL('menuAction:')
 
-    def invoke_action(self, caller: Union[NSMenuItem, NSButton]):
+    def invoke_action(self, caller: Union[NSMenuItem, NSButton, UIButton]):
         action = self._actions.get(caller)
         try_call(action)
 

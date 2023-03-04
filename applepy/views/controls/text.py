@@ -4,14 +4,32 @@ from uuid import uuid4
 from ...backend import _MACOS, _IOS
 from .control import Control
 from ...base.utils import try_call
-from ...base.transform_mixins import Placeholder, TextColor, TextControl
+from ...base.types import Color
+from ...base.transform_mixins import (
+    Placeholder,
+    TextColor,
+    TextControl,
+    BackgroundColor
+)
 from ... import AbstractBinding, bindable
 
 if _MACOS:
-    from ...backend.app_kit import NSTextField, UILabel, NSObject, objc_method
+    from ...backend.app_kit import (
+        NSTextField,
+        UILabel,
+        UITextField,
+        NSObject,
+        objc_method
+    )
 
 if _IOS:
-    from ...backend.ui_kit import NSTextField, UILabel, NSObject, objc_method
+    from ...backend.ui_kit import (
+        NSTextField,
+        UILabel,
+        UITextField,
+        NSObject,
+        objc_method
+    )
 
 
 class Label(Control,
@@ -78,7 +96,8 @@ class Label(Control,
 
 class TextField(Control,
                 TextControl,
-                Placeholder):
+                Placeholder,
+                BackgroundColor):
     """ Control that generate a native MacOS single line text edit box. """
 
     def __init__(self, *, text: Union[str, AbstractBinding],
@@ -102,6 +121,7 @@ class TextField(Control,
         Control.__init__(self)
         Placeholder.__init__(self)
         TextControl.__init__(self, text)
+        BackgroundColor.__init__(self)
 
         @objc_method
         def controlTextDidChange_(_self, notification):
@@ -111,9 +131,19 @@ class TextField(Control,
 
             try_call(on_text_changed)
 
-        _TextFieldDelegate = type(f'_TextFieldDelegate_{uuid4().hex[:8]}', (NSObject,), {
-            'controlTextDidChange_': controlTextDidChange_
-        })
+        @objc_method
+        def textField_shouldChangeCharactersIn_replacementString_(_self, field, current, new):
+            try_call(on_text_changed)
+
+        props = {}
+
+        if _MACOS:
+            props['controlTextDidChange_'] = controlTextDidChange_
+
+        if _IOS:
+            props['textField_shouldChangeCharactersIn_replacementString_'] = textField_shouldChangeCharactersIn_replacementString_
+    
+        _TextFieldDelegate = type(f'_TextFieldDelegate_{uuid4().hex[:8]}', (NSObject,), props)
 
         self._text_field = None
         self._controller = _TextFieldDelegate.alloc().init()
@@ -143,7 +173,13 @@ class TextField(Control,
         Returns:
             TextField: self
         """
-        self._text_field = NSTextField.textFieldWithString_(self.text)
+        if _MACOS:
+            self._text_field = NSTextField.textFieldWithString_(self.text)
+
+        if _IOS:
+            self._text_field = UITextField.alloc().init()
+            self._text_field.text = self.text
+
         self._text_field.delegate = self._controller
         
         Control.parse(self),

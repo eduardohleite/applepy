@@ -261,14 +261,20 @@ class Spacer(View, BackgroundColor):
         Returns:
             Spacer: self
         """
-        self._stack_view = NSStackView.alloc().init()
-        self._stack_view.orientation = StackOrientation.vertical
-        self._stack_view.distribution = StackDistribution.fill
+        if _MACOS:
+            self._stack_view = NSStackView.alloc().init()
+            self._stack_view.orientation = StackOrientation.vertical
+            self._stack_view.distribution = StackDistribution.fill
+
+        if _IOS:
+            self._stack_view = UIStackView.alloc().init()
+            self._stack_view.axis = StackOrientation.vertical
+            self._stack_view.distribution = StackDistribution.fill
 
         self.parent.ns_object.addArrangedSubview_(self.ns_object)
         return super().parse()
 
-    def get_ns_object(self) -> NSStackView:
+    def get_ns_object(self) -> Union[NSStackView, UIStackView]:
         """
         The spacer's NSStackView instance.
         Do not call it directly, use the ns_object property instead.

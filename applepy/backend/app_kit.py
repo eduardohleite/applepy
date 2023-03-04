@@ -21,6 +21,8 @@ UIColor = Any
 UITabBarController = Any
 UIPageViewController = Any
 UIApplicationMain = Any
+UITextField = Any
+UIButton = Any
 
 NSStringFromClass = Foundation.NSStringFromClass
 NSStringFromClass.restype = objc_id

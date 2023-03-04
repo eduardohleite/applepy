@@ -15,7 +15,8 @@ from .base.types import (
     AlertResponse,
     AlertStyle,
     DialogResponse,
-    ProgressStyle
+    ProgressStyle,
+    ButtonStyle
 )
 from .base.binding import (
     bindable,
