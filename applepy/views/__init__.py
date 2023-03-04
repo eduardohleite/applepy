@@ -9,4 +9,12 @@ if _MACOS:
         StatusIcon
     )
 
+    from .feedback import (
+        Alert,
+        FileDialog,
+        OpenDialog,
+        SaveDialog
+    )
+
+if _IOS:
     from .feedback import Alert

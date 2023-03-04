@@ -46,7 +46,10 @@ if _IOS:
         StackDistribution,
         ImagePosition,
         Date,
-        ButtonStyle
+        ButtonStyle,
+        AlertResponse,
+        AlertActionStyle,
+        AlertAction
     )
     from .base.binding import (
         bindable,

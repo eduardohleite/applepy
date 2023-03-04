@@ -26,9 +26,14 @@ NSImage = Any
 NSStackView = Any
 NSTextField = Any
 NSColor = Any
+NSAlert = Any
+NSOpenPanel = Any
+NSSavePanel = Any
 
 NSDate = ObjCClass('NSDate')
 NSURL = ObjCClass('NSURL')
+
+UTType = ObjCClass('UTType')
 
 UIApplication = ObjCClass('UIApplication')
 UIWindow = ObjCClass('UIWindow')
@@ -43,6 +48,8 @@ UIColor = ObjCClass('UIColor')
 UITextField = ObjCClass('UITextField')
 UIButton = ObjCClass('UIButton')
 UIButtonConfiguration = ObjCClass('UIButtonConfiguration')
+UIAlertController = ObjCClass('UIAlertController')
+UIAlertAction = ObjCClass('UIAlertAction')
 
 UIApplicationMain = uilib.UIApplicationMain
 UIApplicationMain.restype = c_int
@@ -96,3 +103,8 @@ class UIControlEvents(Enum):
     UIControlEventApplicationReserved = 0x0F000000
     UIControlEventSystemReserved = 0xF0000000
     UIControlEventAllEvents = 0xFFFFFFFF
+
+
+class UIAlertControllerStyle(Enum):
+    UIAlertControllerStyleActionSheet = 0
+    UIAlertControllerStyleAlert = 1
