@@ -47,7 +47,7 @@ class Color(BindableMixin):
             return cls(NSColor.systemBlueColor)
         
         if _IOS:
-            return cls(UIColor.systemBlueColor)
+            return cls(UIColor.systemBlueColor())
 
     @classmethod
     @property
@@ -56,7 +56,7 @@ class Color(BindableMixin):
             return cls(NSColor.systemBrownColor)
         
         if _IOS:
-            return cls(UIColor.systemBrownColor)
+            return cls(UIColor.systemBrownColor())
 
     @classmethod
     @property
@@ -65,7 +65,7 @@ class Color(BindableMixin):
             return cls(NSColor.systemGrayColor)
         
         if _IOS:
-            return cls(UIColor.systemGrayColor)
+            return cls(UIColor.systemGrayColor())
         
     @classmethod
     @property
@@ -74,7 +74,7 @@ class Color(BindableMixin):
             raise NotSupportedError()
         
         if _IOS:
-            return cls(UIColor.systemCyanColor)
+            return cls(UIColor.systemCyanColor())
 
     @classmethod
     @property
@@ -83,7 +83,7 @@ class Color(BindableMixin):
             return cls(NSColor.systemGreenColor)
         
         if _IOS:
-            return cls(UIColor.systemGreenColor)
+            return cls(UIColor.systemGreenColor())
 
     @classmethod
     @property
@@ -92,7 +92,7 @@ class Color(BindableMixin):
             return cls(NSColor.systemIndigoColor)
         
         if _IOS:
-            return cls(UIColor.systemIndigoColor)
+            return cls(UIColor.systemIndigoColor())
         
     @classmethod
     @property
@@ -110,7 +110,7 @@ class Color(BindableMixin):
             return cls(NSColor.systemOrangeColor)
         
         if _IOS:
-            return cls(UIColor.systemOrangeColor)
+            return cls(UIColor.systemOrangeColor())
 
     @classmethod
     @property
@@ -119,7 +119,7 @@ class Color(BindableMixin):
             return cls(NSColor.systemPinkColor)
         
         if _IOS:
-            return cls(UIColor.systemPinkColor)
+            return cls(UIColor.systemPinkColor())
 
     @classmethod
     @property
@@ -128,7 +128,7 @@ class Color(BindableMixin):
             return cls(NSColor.systemPurpleColor)
         
         if _IOS:
-            return cls(UIColor.systemPurpleColor)
+            return cls(UIColor.systemPurpleColor())
 
     @classmethod
     @property
@@ -137,7 +137,7 @@ class Color(BindableMixin):
             return cls(NSColor.systemRedColor)
         
         if _IOS:
-            return cls(UIColor.systemRedColor)
+            return cls(UIColor.systemRedColor())
 
     @classmethod
     @property
@@ -146,7 +146,7 @@ class Color(BindableMixin):
             return cls(NSColor.systemTealColor)
         
         if _IOS:
-            return cls(UIColor.systemTealColor)
+            return cls(UIColor.systemTealColor())
 
     @classmethod
     @property
@@ -155,7 +155,7 @@ class Color(BindableMixin):
             return cls(NSColor.systemYellowColor)
         
         if _IOS:
-            return cls(UIColor.systemYellowColor)
+            return cls(UIColor.systemYellowColor())
         
     # Adaptable Gray Colors (iOS only)
     @classmethod
@@ -165,7 +165,7 @@ class Color(BindableMixin):
             raise NotSupportedError()
         
         if _IOS:
-            return cls(UIColor.systemGray2Color)
+            return cls(UIColor.systemGray2Color())
         
     @classmethod
     @property
@@ -174,7 +174,7 @@ class Color(BindableMixin):
             raise NotSupportedError()
         
         if _IOS:
-            return cls(UIColor.systemGray3Color)
+            return cls(UIColor.systemGray3Color())
         
     @classmethod
     @property
@@ -183,7 +183,7 @@ class Color(BindableMixin):
             raise NotSupportedError()
         
         if _IOS:
-            return cls(UIColor.systemGray4Color)
+            return cls(UIColor.systemGray4Color())
         
     @classmethod
     @property
@@ -192,7 +192,7 @@ class Color(BindableMixin):
             raise NotSupportedError()
         
         if _IOS:
-            return cls(UIColor.systemGray5Color)
+            return cls(UIColor.systemGray5Color())
         
     @classmethod
     @property
@@ -201,7 +201,7 @@ class Color(BindableMixin):
             raise NotSupportedError()
         
         if _IOS:
-            return cls(UIColor.systemGray6Color)
+            return cls(UIColor.systemGray6Color())
 
     # Transparent Color
     @classmethod
@@ -211,7 +211,7 @@ class Color(BindableMixin):
             return cls(NSColor.systemClearColor)
         
         if _IOS:
-            return cls(UIColor.systemClearColor)
+            return cls(UIColor.clearColor)
 
     # Fixed Colors
     @classmethod
@@ -357,7 +357,7 @@ class Color(BindableMixin):
             return cls(NSColor.secondaryLabelColor)
         
         if _IOS:
-            return cls(UIColor.secondaryLabelColor)
+            return cls(UIColor.secondaryLabelColor())
 
     @classmethod
     @property
@@ -366,7 +366,7 @@ class Color(BindableMixin):
             return cls(NSColor.tertiaryLabelColor)
         
         if _IOS:
-            return cls(UIColor.tertiaryLabelColor)
+            return cls(UIColor.tertiaryLabelColor())
 
     @classmethod
     @property
@@ -375,7 +375,7 @@ class Color(BindableMixin):
             return cls(NSColor.quaternaryLabelColor)
         
         if _IOS:
-            return cls(UIColor.quaternaryLabelColor)
+            return cls(UIColor.quaternaryLabelColor())
         
     # Fill Colors (iOS only)
     @classmethod
@@ -385,7 +385,7 @@ class Color(BindableMixin):
             raise NotSupportedError()
         
         if _IOS:
-            return cls(UIColor.systemFillColor)
+            return cls(UIColor.systemFillColor())
         
     @classmethod
     @property
@@ -394,25 +394,25 @@ class Color(BindableMixin):
             raise NotSupportedError()
         
         if _IOS:
-            return cls(UIColor.secondarySystemFillColor)
+            return cls(UIColor.secondarySystemFillColor())
         
     @classmethod
     @property
-    def terciary_system_fill_color(cls):
+    def tertiary_system_fill_color(cls):
         if _MACOS:
             raise NotSupportedError()
         
         if _IOS:
-            return cls(UIColor.terciarySystemFillColor)
+            return cls(UIColor.tertiarySystemFillColor())
         
     @classmethod
     @property
-    def quartenary_system_fill_color(cls):
+    def quaternary_system_fill_color(cls):
         if _MACOS:
             raise NotSupportedError()
         
         if _IOS:
-            return cls(UIColor.quartenarySystemFillColor)
+            return cls(UIColor.quaternarySystemFillColor())
 
     # Text Colors
     @classmethod
@@ -431,7 +431,7 @@ class Color(BindableMixin):
             return cls(NSColor.placeholderTextColor)
 
         if _IOS:
-            return cls(UIColor.placeholderTextColor)
+            return cls(UIColor.placeholderTextColor())
 
     @classmethod
     @property
@@ -495,7 +495,7 @@ class Color(BindableMixin):
             raise NotSupportedError()
     
         if _IOS:
-            return cls(UIColor.tintColor)
+            return cls(UIColor.tintColor())
         
     # Standard Control Background Colors (iOS Only)
     @classmethod
@@ -514,16 +514,16 @@ class Color(BindableMixin):
             raise NotSupportedError()
     
         if _IOS:
-            return cls(UIColor.secondarySystemBackgroundColor)
+            return cls(UIColor.secondarySystemBackgroundColor())
         
     @classmethod
     @property
-    def terciary_system_background_color(cls):
+    def tertiary_system_background_color(cls):
         if _MACOS:
             raise NotSupportedError()
     
         if _IOS:
-            return cls(UIColor.terciarySystemBackgroundColor)
+            return cls(UIColor.tertiarySystemBackgroundColor())
         
     # Grouped Content Background Colors (iOS Only)
     @classmethod
@@ -533,7 +533,7 @@ class Color(BindableMixin):
             raise NotSupportedError()
     
         if _IOS:
-            return cls(UIColor.systemGroupedBackgroundColor)
+            return cls(UIColor.systemGroupedBackgroundColor())
         
     @classmethod
     @property
@@ -542,16 +542,16 @@ class Color(BindableMixin):
             raise NotSupportedError()
     
         if _IOS:
-            return cls(UIColor.secondarySystemGroupedBackgroundColor)
+            return cls(UIColor.secondarySystemGroupedBackgroundColor())
         
     @classmethod
     @property
-    def terciary_system_grouped_background_color(cls):
+    def tertiary_system_grouped_background_color(cls):
         if _MACOS:
             raise NotSupportedError()
     
         if _IOS:
-            return cls(UIColor.terciarySystemGroupedBackgroundColor)
+            return cls(UIColor.tertiarySystemGroupedBackgroundColor())
         
     # Separator Colors (iOS Only)
     @classmethod
@@ -561,7 +561,7 @@ class Color(BindableMixin):
             return cls(NSColor.separatorColor)
     
         if _IOS:
-            return cls(UIColor.separatorColor)
+            return cls(UIColor.separatorColor())
         
     @classmethod
     @property
@@ -570,7 +570,7 @@ class Color(BindableMixin):
             raise NotSupportedError()
     
         if _IOS:
-            return cls(UIColor.opaqueSeparatorColor)
+            return cls(UIColor.opaqueSeparatorColor())
 
     # Content Colors
     @classmethod
@@ -580,7 +580,7 @@ class Color(BindableMixin):
             return cls(NSColor.linkColor)
         
         if _IOS:
-            return cls(UIColor.linkColor)
+            return cls(UIColor.linkColor())
 
     @classmethod
     @property

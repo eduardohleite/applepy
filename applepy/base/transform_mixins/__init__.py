@@ -4,6 +4,7 @@ from .layout import LayoutPadding, LayoutSpacing, LayoutAlignment
 from .control import(
     TitledControl,
     BezelColor,
+    TintColor,
     ControlWithState,
     KeyBindable,
     Placeholder,

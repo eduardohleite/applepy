@@ -4,6 +4,7 @@ from inspect import iscoroutinefunction
 from ...base.transform_mixins import (
     TitledControl,
     BezelColor,
+    TintColor,
     ControlWithState,
     KeyBindable,
     ImageControl,
@@ -31,6 +32,7 @@ if _IOS:
 class Button(Control,
              TitledControl,
              BezelColor,
+             TintColor,
              KeyBindable):
 
     """ Control that generates a native MacOS PushButton. """
@@ -58,6 +60,7 @@ class Button(Control,
         Control.__init__(self)
         TitledControl.__init__(self, title)
         BezelColor.__init__(self)
+        TintColor.__init__(self)
         KeyBindable.__init__(self, key_equivalent)
 
         self.style = style
@@ -131,6 +134,7 @@ class Button(Control,
         Control.parse(self)
         TitledControl.parse(self, TitledControl)
         BezelColor.parse(self, BezelColor)
+        TintColor.parse(self, TintColor)
         KeyBindable.parse(self, KeyBindable)
 
         return self
