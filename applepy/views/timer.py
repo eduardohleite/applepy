@@ -1,8 +1,11 @@
-from typing import Union, Optional, Callable
+from typing import Union, Optional, Callable, Coroutine
 from threading import Timer as TimerThread
+from inspect import iscoroutinefunction
 
 from .. import bindable, AbstractBinding
-from ..base.utils import try_call
+from ..base.utils import try_call, try_call_async
+
+import asyncio
 
 
 class Timer:
@@ -41,9 +44,13 @@ class Timer:
             self._current_timer.cancel()
             self._current_timer = None
         elif not self._enabled and val:
-            if not self._current_timer:
-                self._set_timer()
-            self._current_timer.start()
+            if self._is_async:
+                self._enabled = True
+                self._set_async_timer()
+            else:
+                if not self._current_timer:
+                    self._set_timer()
+                self._current_timer.start()
 
         self._enabled = val
 
@@ -64,14 +71,14 @@ class Timer:
     def __init__(self, *, interval: Union[float, AbstractBinding],
                           repeat: Union[bool, AbstractBinding]=False,
                           enabled: Union[bool, AbstractBinding]=False,
-                          action: Optional[Callable]=None) -> None:
+                          action: Optional[Union[Callable, Coroutine]]=None) -> None:
         """
         Create a `Timer` non-visual component.
         Example:
         >>>Timer(interval=5., repeat=True, action=self.timer_timeout)
 
         Args:
-            interval (Union[float, AbstractBinding]): The Timer's interfal.
+            interval (Union[float, AbstractBinding]): The Timer's interval.
             repeat (Union[bool, AbstractBinding], optional): Whether or not the Timer should repeat after timeout. Defaults to False.
             enabled (Union[bool, AbstractBinding], optional): Whether or not the Timer should be running. Defaults to False.
             action (Optional[Callable], optional): The action to be run when the Timer times out. Defaults to None.
@@ -98,19 +105,38 @@ class Timer:
             self._enabled = enabled
 
         self._action = action
+        self._is_async = iscoroutinefunction(action)
         self._set_timer()
 
-    def _set_timer(self) -> None:
-        def __timeout():
-            try_call(self._action)
-            if self.repeat and self.enabled:
-                self._set_timer()
-            else:
-                self._current_timer = None
-
-        self._current_timer = TimerThread(self.interval, __timeout)
+    def _set_async_timer(self) -> None:
         if self.enabled:
-            self._current_timer.start()
+            async def __timeout_async():
+                await try_call_async(self._action)
+                if self.repeat and self.enabled:
+                    await __task_async()
+
+
+            async def __task_async():
+                await asyncio.sleep(self.interval)
+                await __timeout_async()
+
+            self._current_timer = asyncio.create_task(__task_async())
+
+
+    def _set_timer(self) -> None:
+        if self._is_async:
+            self._set_async_timer()
+        else:
+            def __timeout():
+                try_call(self._action)
+                if self.repeat and self.enabled:
+                    self._set_timer()
+                else:
+                    self._current_timer = None
+
+            self._current_timer = TimerThread(self.interval, __timeout)
+            if self.enabled:
+                self._current_timer.start()
 
     def _on_repeat_changed(self) -> None:
         self.repeat = self.bound_repeat.value

@@ -1,29 +1,45 @@
-from typing import Callable, Optional, Union
+from typing import Callable, Coroutine, Optional, Union
+from inspect import iscoroutinefunction
 
 from ...base.transform_mixins import (
     TitledControl,
     BezelColor,
+    TintColor,
     ControlWithState,
     KeyBindable,
-    ImageControl
+    ImageControl,
 )
-from ...backend.app_kit import NSButton
+from ...backend import _MACOS, _IOS
 from ...base.binding import AbstractBinding
 from ...base.app import get_current_app
 from ...base.utils import try_call
-from ...base.types import Image, ImagePosition
+from ...base.types import Image, ImagePosition, ButtonStyle
 from .control import Control
+
+if _MACOS:
+    from ...backend.app_kit import NSButton, UIButton
+
+if _IOS:
+    from ...backend.ui_kit import (
+        NSButton,
+        UIButton,
+        UIButtonType,
+        UIControlEvents,
+        UIButtonConfiguration
+    )
 
 
 class Button(Control,
              TitledControl,
              BezelColor,
+             TintColor,
              KeyBindable):
 
     """ Control that generates a native MacOS PushButton. """
 
     def __init__(self, *, title: Union[str, AbstractBinding],
-                          action: Optional[Callable]=None,
+                          action: Optional[Union[Callable, Coroutine]]=None,
+                          style: Optional[ButtonStyle]=None,
                           key_equivalent: Optional[str]=None) -> None:
         """
         Add a new `Button` view, which creates a MacOS standard, text based, Push Button.
@@ -44,11 +60,13 @@ class Button(Control,
         Control.__init__(self)
         TitledControl.__init__(self, title)
         BezelColor.__init__(self)
+        TintColor.__init__(self)
         KeyBindable.__init__(self, key_equivalent)
 
+        self.style = style
         self.action = action
 
-    def get_ns_object(self) -> NSButton:
+    def get_ns_object(self) -> Union[NSButton, UIButton]:
         """
         The button's NSButton instance.
         Do not call it directly, use the ns_object property instead.
@@ -66,16 +84,57 @@ class Button(Control,
         Returns:
             Button: self
         """
-        self._button = NSButton.buttonWithTitle_target_action_(self.title, None, None)
+        if _MACOS:
+            self._button = NSButton.buttonWithTitle_target_action_(self.title, None, None)
 
-        if self.action:
-            self._button.setAction_(
-                get_current_app().register_action(self._button, self.action)
-            )
+            if self.action:
+                if iscoroutinefunction(self.action):
+                    self._button.setAction_(
+                        get_current_app().register_async_action(self._button, self.action)
+                    )
+                else:
+                    self._button.setAction_(
+                        get_current_app().register_action(self._button, self.action)
+                    )
 
+        if _IOS:
+            if self.style:
+                if self.style == ButtonStyle.bordered:
+                    config = UIButtonConfiguration.borderedButtonConfiguration()
+                elif self.style == ButtonStyle.bordered_tinted:
+                    config = UIButtonConfiguration.borderedTintedButtonConfiguration()
+                elif self.style == ButtonStyle.borderless:
+                    config = UIButtonConfiguration.borderlessButtonConfiguration()
+                elif self.style == ButtonStyle.filled:
+                    config = UIButtonConfiguration.filledButtonConfiguration()
+                elif self.style == ButtonStyle.gray:
+                    config = UIButtonConfiguration.grayButtonConfiguration()
+                elif self.style == ButtonStyle.plain:
+                    config = UIButtonConfiguration.plainButtonConfiguration()
+                elif self.style == ButtonStyle.tinted:
+                    config = UIButtonConfiguration.tintedButtonConfiguration()
+
+                self._button = UIButton.buttonWithConfiguration_primaryAction_(config, None)
+            else:
+                self._button = UIButton.buttonWithType_(UIButtonType.UIButtonTypeSystem)
+
+            if self.action:
+                if iscoroutinefunction(self.action):
+                        self._button.addTarget_action_forControlEvents_(
+                        get_current_app()._controller,
+                        get_current_app().register_async_action(self._button, self.action),
+                        UIControlEvents.UIControlEventPrimaryActionTriggered
+                    )
+                else:
+                    self._button.addTarget_action_forControlEvents_(
+                        get_current_app()._controller,
+                        get_current_app().register_action(self._button, self.action),
+                        UIControlEvents.UIControlEventPrimaryActionTriggered
+                    )
         Control.parse(self)
         TitledControl.parse(self, TitledControl)
         BezelColor.parse(self, BezelColor)
+        TintColor.parse(self, TintColor)
         KeyBindable.parse(self, KeyBindable)
 
         return self

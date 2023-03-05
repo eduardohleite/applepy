@@ -1,7 +1,7 @@
-from typing import Optional
+from typing import Optional, Union
 
 from ... import StackedView, Alignment, StackOrientation, StackDistribution
-from ...backend.app_kit import NSStackView
+from ...backend import _MACOS, _IOS
 from ...base.binding import bindable
 from ...base.mixins import Modifiable
 from ...base.scene import Scene
@@ -12,6 +12,12 @@ from ...base.transform_mixins import (
     LayoutPadding,
     LayoutAlignment
 )
+
+if _MACOS:
+    from ...backend.app_kit import NSStackView, UIStackView
+
+if _IOS:
+    from ...backend.ui_kit import NSStackView, UIStackView
 
 
 class StackView(StackedView,
@@ -57,7 +63,7 @@ class StackView(StackedView,
             self._stack_view.distribution = val.value
 
     def __init__(self, *, orientation: StackOrientation,
-                          alignment: Alignment=Alignment.left,
+                          alignment: Optional[Alignment]=None,
                           distribution: Optional[StackDistribution]=None) -> None:
         """
         Add a new `StackView` view, which lays out child views in a horizontal or vertical
@@ -87,6 +93,13 @@ class StackView(StackedView,
             alignment (Alignment, optional): The alignment of the stacked views. Defaults to Alignment.left.
             distribution (StackDistribution, optional): The distribution of the stacked views.
         """
+        if not alignment:
+            if _MACOS:
+                alignment = Alignment.macos_left
+
+            if _IOS:
+                alignment = Alignment.ios_leading
+
         StackedView.__init__(self, (Scene, StackedView))
         BackgroundColor.__init__(self)
         LayoutPadding.__init__(self)
@@ -94,7 +107,6 @@ class StackView(StackedView,
         LayoutAlignment.__init__(self, default_alignment=alignment)
 
         self._orientation = orientation
-
         if not distribution:
             if isinstance(self.parent, Scene):
                 self._distribution = StackDistribution.fill
@@ -103,7 +115,7 @@ class StackView(StackedView,
         else:
             self._distribution = distribution
 
-    def get_ns_object(self) -> NSStackView:
+    def get_ns_object(self) -> Union[NSStackView, UIStackView]:
         """
         The stack view's NSStackView instance.
         Do not call it directly, use the ns_object property instead.
@@ -121,9 +133,14 @@ class StackView(StackedView,
         Returns:
             StackView: self
         """
-        self._stack_view = NSStackView.alloc().init()
-        self._stack_view.orientation = self.orientation.value
-        self._stack_view.distribution = self.distribution.value
+        if _MACOS:
+            self._stack_view = NSStackView.alloc().init()
+            self._stack_view.orientation = self.orientation.value
+            self._stack_view.distribution = self.distribution.value
+        if _IOS:
+            self._stack_view = UIStackView.alloc().init()
+            self._stack_view.axis = self.orientation.value
+            self._stack_view.distribution = self.distribution.value
 
         if isinstance(self.parent, StackView):
             self.parent.ns_object.addArrangedSubview_(self.ns_object)
@@ -141,7 +158,7 @@ class StackView(StackedView,
 class HorizontalStack(StackView):
     """ Layout view horizontally in a stack. """
 
-    def __init__(self, *, alignment: Alignment=Alignment.center_y,
+    def __init__(self, *, alignment: Optional[Alignment]=None,
                           distribution: Optional[StackDistribution]=None) -> None:
         """
         Shortcut to create a horizontal StackView.
@@ -167,6 +184,13 @@ class HorizontalStack(StackView):
             alignment (Alignment, optional): The alignment of the stacked views. Defaults to Alignment.center_y.
             distribution (StackDistribution, optional): The distribution of the stacked views. Defaults to StackDistribution.fill.
         """
+        if not alignment:
+            if _MACOS:
+                alignment = Alignment.macos_center_y
+
+            if _IOS:
+                alignment = Alignment.ios_center
+
         super().__init__(orientation=StackOrientation.horizontal,
                          alignment=alignment,
                          distribution=distribution)
@@ -175,7 +199,7 @@ class HorizontalStack(StackView):
 class VerticalStack(StackView):
     """ Layout view vertically in a stack. """
 
-    def __init__(self, *, alignment: Alignment=Alignment.center_x,
+    def __init__(self, *, alignment: Optional[Alignment]=None,
                           distribution: Optional[StackDistribution]=None) -> None:
         """
         Shortcut to create a vertical StackView.
@@ -201,6 +225,13 @@ class VerticalStack(StackView):
             alignment (Alignment, optional): The alignment of the stacked views. Defaults to Alignment.center_y.
             distribution (StackDistribution, optional): The distribution of the stacked views. Defaults to StackDistribution.fill.
         """
+        if not alignment:
+            if _MACOS:
+                alignment = Alignment.macos_center_x
+
+            if _IOS:
+                alignment = Alignment.ios_center
+
         super().__init__(orientation=StackOrientation.vertical,
                          alignment=alignment,
                          distribution=distribution)
@@ -230,14 +261,20 @@ class Spacer(View, BackgroundColor):
         Returns:
             Spacer: self
         """
-        self._stack_view = NSStackView.alloc().init()
-        self._stack_view.orientation = StackOrientation.vertical
-        self._stack_view.distribution = StackDistribution.fill
+        if _MACOS:
+            self._stack_view = NSStackView.alloc().init()
+            self._stack_view.orientation = StackOrientation.vertical
+            self._stack_view.distribution = StackDistribution.fill
+
+        if _IOS:
+            self._stack_view = UIStackView.alloc().init()
+            self._stack_view.axis = StackOrientation.vertical
+            self._stack_view.distribution = StackDistribution.fill
 
         self.parent.ns_object.addArrangedSubview_(self.ns_object)
         return super().parse()
 
-    def get_ns_object(self) -> NSStackView:
+    def get_ns_object(self) -> Union[NSStackView, UIStackView]:
         """
         The spacer's NSStackView instance.
         Do not call it directly, use the ns_object property instead.

@@ -1,8 +1,9 @@
 from typing import Union, Optional
 from rubicon.objc.types import NSEdgeInsets
 
-from ... import AbstractBinding, Padding, Alignment
-from ..binding import bindable
+from ...backend import _MACOS, _IOS
+from ..types import Padding, Alignment
+from ..binding import AbstractBinding, bindable
 from .base import TransformMixin
 
 
@@ -85,7 +86,14 @@ class LayoutAlignment(TransformMixin):
         self._alignment = val
         LayoutAlignment._set(self)
 
-    def __init__(self, default_alignment: Alignment=Alignment.left) -> None:
+    def __init__(self, default_alignment: Optional[Alignment]=None) -> None:
+        if not default_alignment:
+            if _MACOS:
+                default_alignment = Alignment.macos_left
+
+            if _IOS:
+                default_alignment = Alignment.ios_leading
+
         self._alignment = default_alignment
 
     def _on_alignment_changed(self, signal, sender, event):

@@ -3,7 +3,8 @@ from ...base.transform_mixins import Enable
 from ..layout import StackView
 
 
-class Control(View, Enable):
+class Control(View,
+              Enable):
     """ Base class for Control-based views. """
 
     def __init__(self) -> None:

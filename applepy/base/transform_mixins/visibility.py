@@ -1,6 +1,6 @@
 from typing import Union
 
-from ... import AbstractBinding
+from ..binding import AbstractBinding
 
 
 class Enable:

@@ -26,6 +26,7 @@
 - [ ] Combobox
 
 ### Features
+- [-] Async support
 - [x] Submenu action
 - [ ] StatusIcon action
 - [x] Attach Menu to StatusIcon
@@ -33,7 +34,7 @@
 - [x] Alert
 - [-] Dialogs
 - [ ] List binding
-- [ ] iOS/UI Kit backend
+- [-] iOS/UI Kit backend
 - [x] Examples
 - [ ] Standalone documentation generation
 - [x] pip packaging

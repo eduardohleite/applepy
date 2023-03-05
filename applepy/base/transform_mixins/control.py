@@ -1,9 +1,14 @@
 from typing import Union, Optional, Tuple, Callable
 
+from ...backend import _MACOS, _IOS
 from ...base.types import Color, Image, ImagePosition
-from ... import AbstractBinding, bindable
 from ...base.utils import try_call
+from ...base.errors import NotSupportedError
+from ..binding import AbstractBinding, bindable
 from .base import TransformMixin
+
+if _IOS:
+    from ...backend.ui_kit import UIControlState
 
 
 class TitledControl(TransformMixin):
@@ -29,7 +34,11 @@ class TitledControl(TransformMixin):
 
     def _set(self) -> None:
         if self.ns_object:
-            self.ns_object.title = self._title
+            if _MACOS:
+                self.ns_object.title = self._title
+
+            if _IOS:
+                self.ns_object.setTitle_forState_(self._title, UIControlState.UIControlStateNormal)
 
     def set_title(self, title: Union[str, AbstractBinding]):
         def __modifier():
@@ -122,15 +131,20 @@ class BezelColor(TransformMixin):
         BezelColor._set(self)
 
     def __init__(self) -> None:
-        self._bezel_color = Color.control_color
+        if _MACOS:
+            self._bezel_color = Color.control_color
 
     def _on_bezel_color_changed(self, signal, sender, event):
         self.bezel_color = self.bound_bezel_color.value
 
     def _set(self) -> None:
-        self.ns_object.bezelColor = self.bezel_color.value
+        if _MACOS:
+            self.ns_object.bezelColor = self.bezel_color.value
 
     def set_bezel_color(self, bezel_color: Union[Color, AbstractBinding]):
+        if _IOS:
+            raise NotSupportedError()
+
         def __modifier():
             if isinstance(bezel_color, AbstractBinding):
                 self.bound_bezel_color = bezel_color
@@ -138,6 +152,44 @@ class BezelColor(TransformMixin):
                 self.bezel_color = bezel_color.value
             else:
                 self.bezel_color = bezel_color
+
+        self._modifiers.append(__modifier)
+
+        return self
+    
+
+class TintColor(TransformMixin):
+    @bindable(Color)
+    def tint_color(self) -> Color:
+        return self._tint_color
+
+    @tint_color.setter
+    def tint_color(self, val: Color) -> None:
+        self._tint_color = val
+        TintColor._set(self)
+
+    def __init__(self) -> None:
+        if _IOS:
+            self._tint_color = Color.tint_color
+
+    def _on_tint_color_changed(self, signal, sender, event):
+        self.tint_color = self.bound_tint_color.value
+
+    def _set(self) -> None:
+        if _IOS:
+            self.ns_object.tintColor = self.tint_color.value
+
+    def set_tint_color(self, tint_color: Union[Color, AbstractBinding]):
+        if _MACOS:
+            raise NotSupportedError()
+
+        def __modifier():
+            if isinstance(tint_color, AbstractBinding):
+                self.bound_tint_color = tint_color
+                self.bound_tint_color.on_changed.connect(self._on_tint_color_changed)
+                self.tint_color = tint_color.value
+            else:
+                self.tint_color = tint_color
 
         self._modifiers.append(__modifier)
 
@@ -187,13 +239,14 @@ class TextColor(TransformMixin):
         self._text_color = val
         TextColor._set(self)
 
-    def __init__(self) -> None:
-        self._text_color = Color.text_color
+    def __init__(self, default_color: Color=Color.label_color) -> None:
+        self._text_color = default_color
 
     def _on_text_color_changed(self, signal, sender, event):
         self.text_color = self.bound_text_color.value
 
     def _set(self) -> None:
+        print(self.text_color.value)
         self.ns_object.textColor = self.text_color.value
 
     def set_text_color(self, text_color: Union[Color, AbstractBinding]):

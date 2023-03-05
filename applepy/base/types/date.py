@@ -2,7 +2,13 @@ from datetime import datetime
 from typing import Optional
 
 from ...base.binding import BindableMixin
-from ...backend.app_kit import NSDate
+from ...backend import _MACOS, _IOS
+
+if _MACOS:
+    from ...backend.app_kit import NSDate, ObjCInstance
+
+if _IOS:
+    from ...backend.ui_kit import NSDate, ObjCInstance
 
 
 class Date(BindableMixin):
@@ -43,7 +49,61 @@ class Date(BindableMixin):
         return str(self.value.description)
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, Date):
+        if isinstance(other, Date):
+            return self.datetime == other.datetime
+        elif isinstance(other, datetime):
+            return self.datetime == other
+        elif isinstance(other, ObjCInstance):
+            return self.datetime == Date(other).datetime
+        else:
             return False
 
-        return  self.datetime == other.datetime
+    def __ne__(self, other: object) -> bool:
+        if isinstance(other, Date):
+            return self.datetime != other.datetime
+        elif isinstance(other, datetime):
+            return self.datetime != other
+        elif isinstance(other, ObjCInstance):
+            return self.datetime != Date(other).datetime
+        else:
+            return True
+
+    def __gt__(self, other: object) -> bool:
+        if isinstance(other, Date):
+            return self.datetime > other.datetime
+        elif isinstance(other, datetime):
+            return self.datetime > other
+        elif isinstance(other, ObjCInstance):
+            return self.datetime > Date(other).datetime
+        else:
+            return False
+
+    def __ge__(self, other: object) -> bool:
+        if isinstance(other, Date):
+            return self.datetime >= other.datetime
+        elif isinstance(other, datetime):
+            return self.datetime >= other
+        elif isinstance(other, ObjCInstance):
+            return self.datetime >= Date(other).datetime
+        else:
+            return False
+
+    def __lt__(self, other: object) -> bool:
+        if isinstance(other, Date):
+            return self.datetime < other.datetime
+        elif isinstance(other, datetime):
+            return self.datetime < other
+        elif isinstance(other, ObjCInstance):
+            return self.datetime < Date(other).datetime
+        else:
+            return False
+
+    def __le__(self, other: object) -> bool:
+        if isinstance(other, Date):
+            return self.datetime <= other.datetime
+        elif isinstance(other, datetime):
+            return self.datetime <= other
+        elif isinstance(other, ObjCInstance):
+            return self.datetime <= Date(other).datetime
+        else:
+            return False

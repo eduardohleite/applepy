@@ -1,4 +1,5 @@
-from typing import Callable, Optional, Union
+from typing import Callable, Coroutine, Optional, Union
+from inspect import iscoroutinefunction
 
 from .. import View, StackedView, Image, ImagePosition
 from ..backend.app_kit import NSMenu, NSMenuItem, NSButton, NSSize
@@ -122,7 +123,7 @@ class Submenu(StackedView,
     """
 
     def __init__(self, *, title: str,
-                          action: Optional[Callable] = None,
+                          action: Optional[Union[Callable, Coroutine]] = None,
                           key_equivalent: str = '') -> None:
         """
         Add a new `Submenu` view, which creates a native MacOS submenu that can be attached
@@ -170,9 +171,14 @@ class Submenu(StackedView,
                                                  self.key_equivalent)
 
         if self.action:
-            self._main_menu_item.setAction_(
-                get_current_app().register_action(self._main_menu_item, self.action) 
-            )
+            if iscoroutinefunction(self.action):
+                self._main_menu_item.setAction_(
+                    get_current_app().register_async_action(self._main_menu_item, self.action) 
+                )
+            else:
+                self._main_menu_item.setAction_(
+                    get_current_app().register_action(self._main_menu_item, self.action) 
+                )
 
         self._main_menu_item_menu = NSMenu \
             .alloc() \
@@ -197,7 +203,7 @@ class MenuItem(View,
     Control that generates a native MacOS menu item that can be attached to a `Submenu`.
     """
     def __init__(self, *, title: Union[str, AbstractBinding],
-                          action: Optional[Callable] = None,
+                          action: Optional[Union[Callable, Coroutine]] = None,
                           key_equivalent: str = '') -> None:
         """
         Add a new `MenuItem` view, which creates a native MacOS menu item that can be attached
@@ -264,9 +270,14 @@ class MenuItem(View,
             self.parent.ns_object.addItem(self._menu_item)
         
         if self.action:
-            self._menu_item.setAction_(
-                get_current_app().register_action(self._menu_item, self.action) 
-            )
+            if iscoroutinefunction(self.action):
+                self._menu_item.setAction_(
+                    get_current_app().register_async_action(self._menu_item, self.action) 
+                )
+            else:
+                self._menu_item.setAction_(
+                    get_current_app().register_action(self._menu_item, self.action) 
+                )
 
         View.parse(self)
         TitledControl.parse(self, TitledControl)

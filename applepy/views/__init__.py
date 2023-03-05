@@ -1,9 +1,20 @@
-from .menu import (
-    Menu,
-    MainMenu,
-    Submenu,
-    MenuItem,
-    StatusIcon
-)
+from ..backend import _MACOS, _IOS
 
-from .feedback import Alert
+if _MACOS:
+    from .menu import (
+        Menu,
+        MainMenu,
+        Submenu,
+        MenuItem,
+        StatusIcon
+    )
+
+    from .feedback import (
+        Alert,
+        FileDialog,
+        OpenDialog,
+        SaveDialog
+    )
+
+if _IOS:
+    from .feedback import Alert

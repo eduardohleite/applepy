@@ -3,42 +3,31 @@ from typing import Callable, List, Optional, Union, Tuple
 
 from .app import get_current_app
 from .mixins import StackMixin, Modifiable, ChildMixin
-from ..base.binding import AbstractBinding
-from ..backend.app_kit import NSView, NSLayoutConstraint
-from ..base.types import Padding
+from ..base.binding import AbstractBinding, bindable
+from ..base.transform_mixins import Width, Height
+from ..backend import _MACOS, _IOS
+
+if _MACOS:
+    from ..backend.app_kit import NSView, UIView
+
+if _IOS:
+    from ..backend.ui_kit import NSView, UIView
 
 
-class View(ABC, Modifiable, ChildMixin):
-    @property
+class View(ABC,
+           Modifiable,
+           ChildMixin,
+           Width,
+           Height):
+    @bindable(str)
     def tooltip(self) -> Optional[str]:
+        # does iOS have tooltip?
         return self._tooltip
 
     @tooltip.setter
     def tooltip(self, val: Optional[str]) -> None:
         self._tooltip = val
         self.ns_object.toolTip = val
-
-    @property
-    def grab_constraint(self) -> Optional[Padding]:
-        return self._grab_constraint
-
-    @grab_constraint.setter
-    def grab_constraint(self, val: Optional[Padding]) -> None:
-        self._grab_constraint = val
-
-        if val is not None:
-            self.ns_object.translatesAutoresizingMaskIntoConstraints = False
-            self._activated_constraints = [
-                self.ns_object.leadingAnchor.constraintEqualToSystemSpacingAfterAnchor_(self.parent.leadingAnchor, 1.),
-                self.ns_object.trailingAnchor.constraintEqualToSystemSpacingAfterAnchor_(self.parent.trailingAnchor, 1.),
-                self.ns_object.topAnchor.constraintEqualToSystemSpacingAfterAnchor_(self.parent.topAnchor, 1.),
-                self.ns_object.bottomAnchor.constraintEqualToSystemSpacingAfterAnchor_(self.parent.bottomAnchor, 1.)
-            ]
-
-        else:
-            self.ns_object.translatesAutoresizingMaskIntoConstraints = True
-            if self._activated_constraints:
-                NSLayoutConstraint.deactivateConstraints_(self._activated_constraints)
 
     def __init__(self, valid_parent_types: Optional[Tuple[type]]=None) -> None:
         self.parent = get_current_app().get()
@@ -54,6 +43,8 @@ class View(ABC, Modifiable, ChildMixin):
 
         Modifiable.__init__(self)
         ChildMixin.__init__(self, valid_parent_types)
+        Width.__init__(self)
+        Height.__init__(self)
 
         # register itself in parent's stack
         # TODO: is there a better way to not stack a view with a custom body?
@@ -69,18 +60,15 @@ class View(ABC, Modifiable, ChildMixin):
         return Modifiable.parse(self)
 
     @abstractmethod
-    def get_ns_object(self) -> NSView:
+    def get_ns_object(self) -> Union[NSView, UIView]:
         pass
 
     @property
-    def ns_object(self) -> NSView:
+    def ns_object(self) -> Union[NSView, UIView]:
         return self.get_ns_object()
 
     def _on_tooltip_changed(self, signal, sender, event):
         self.tooltip = self.bound_tooltip.value
-
-    def _on_grab_constraint_changed(self, signal, sender, event):
-        self.grab_constraint = self.bound_grab_constraint.value
 
     def set_tooltip(self, tooltip: Union[Optional[str], AbstractBinding]=None):
         def __modifier():
@@ -90,23 +78,6 @@ class View(ABC, Modifiable, ChildMixin):
                 self.tooltip = tooltip.value
             else:
                 self.tooltip = tooltip
-
-        self._modifiers.append(__modifier)
-
-        return self
-
-    # TODO: this is incomplete
-    def grab(self, target=None, grab_constraint: Union[Optional[Padding], AbstractBinding]=None):
-        if not target:
-            target = self.parent
-
-        def __modifier():
-            if isinstance(grab_constraint, AbstractBinding):
-                self.bound_grab_constraint = grab_constraint
-                self.bound_grab_constraint.on_changed.connect(self._on_grab_constraint_changed)
-                self.grab_constraint = grab_constraint.value
-            else:
-                self.grab_constraint = grab_constraint
 
         self._modifiers.append(__modifier)
 

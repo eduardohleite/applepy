@@ -7,8 +7,10 @@ from ..base.binding import AbstractBinding, bindable
 from ..base.mixins import Modifiable
 from ..base.utils import attachable, try_call
 from ..base.view import View
+from ..backend import _MACOS, _IOS
 from ..base.errors import (
-    AddingMultipleChildrenToNonStackableViewError
+    AddingMultipleChildrenToNonStackableViewError,
+    NotSupportedError
 )
 from ..base.transform_mixins import (
     BackgroundColor,
@@ -17,15 +19,16 @@ from ..base.transform_mixins import (
     TitledControl,
     Visible
 )
-from ..backend.app_kit import (
-    NSApp,
-    NSObject,
-    NSWindow,
-    NSWindowStyleMask,
-    NSBackingStoreType,
-    NSRect, NSPoint, NSSize,
-    objc_method
-)
+if _MACOS:
+    from ..backend.app_kit import (
+        NSApp,
+        NSObject,
+        NSWindow,
+        NSWindowStyleMask,
+        NSBackingStoreType,
+        NSRect, NSPoint, NSSize,
+        objc_method
+    )
 
 
 class Window(Scene,
@@ -177,6 +180,9 @@ class Window(Scene,
             on_full_screen_changed (Optional[Callable], optional): Action to be executed when the window enters or exits full-screen mode. Defaults to None.
             on_minimized (Optional[Callable], optional): Action to be executed when the window is minimized. Defaults to None.
         """
+        if _IOS:
+            raise NotSupportedError()
+
         Scene.__init__(self, (type(None), Window))
         Modifiable.__init__(self)
         BackgroundColor.__init__(self)

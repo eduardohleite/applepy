@@ -1,7 +1,9 @@
+from typing import Any
 from rubicon.objc import (
     ObjCClass, ObjCProtocol, ObjCInstance, NSObject, objc_method, objc_classmethod
 )
-from rubicon.objc.runtime import load_library, SEL, objc_id
+from rubicon.objc.eventloop import EventLoopPolicy, CocoaLifecycle, iOSLifecycle
+from rubicon.objc.runtime import load_library, send_super, SEL, objc_id, Foundation
 from rubicon.objc.types import NSRect, NSPoint, NSSize
 from enum import Enum
 
@@ -9,30 +11,48 @@ from enum import Enum
 load_library('AppKit')
 load_library('Cocoa')
 
+UIApplication = Any
+UIWindow = Any
+UIViewController = Any
+UIScreen = Any
+UIView = Any
+UIStackView = Any
+UILabel = Any
+UIColor = Any
+UITabBarController = Any
+UIPageViewController = Any
+UIApplicationMain = Any
+UITextField = Any
+UIButton = Any
 
+NSStringFromClass = Foundation.NSStringFromClass
+NSStringFromClass.restype = objc_id
+NSStringFromClass.argtypes = [objc_id]
+
+NSDate = ObjCClass('NSDate')
+NSURL = ObjCClass('NSURL')
+
+NSColor = ObjCClass('NSColor')
 NSApplication = ObjCClass('NSApplication')
 NSWindow = ObjCClass('NSWindow')
 NSNotification = ObjCClass('NSNotification')
+NSImage = ObjCClass('NSImage')
 NSMenu = ObjCClass('NSMenu')
 NSMenuItem = ObjCClass('NSMenuItem')
 NSStackView = ObjCClass('NSStackView')
 NSView = ObjCClass('NSView')
 NSTextField = ObjCClass('NSTextField')
 NSButton = ObjCClass('NSButton')
-NSColor = ObjCClass('NSColor')
 NSControl = ObjCClass('NSControl')
 NSLayoutConstraint = ObjCClass('NSLayoutConstraint')
 NSStatusBar = ObjCClass('NSStatusBar')
 NSStatusItem = ObjCClass('NSStatusItem')
-NSImage = ObjCClass('NSImage')
 NSAlert = ObjCClass('NSAlert')
 NSOpenPanel = ObjCClass('NSOpenPanel')
 NSSavePanel = ObjCClass('NSSavePanel')
-NSDate = ObjCClass('NSDate')
 NSDateComponents = ObjCClass('NSDateComponents')
 NSCalendar = ObjCClass('NSCalendar')
 NSDatePicker = ObjCClass('NSDatePicker')
-NSURL = ObjCClass('NSURL')
 NSDatePickerCell = ObjCClass('NSDatePickerCell')
 NSProgressIndicator = ObjCClass('NSProgressIndicator')
 

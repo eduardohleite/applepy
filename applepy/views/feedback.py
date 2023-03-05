@@ -1,183 +1,288 @@
-from typing import Optional, Any, Tuple, List
+from typing import Optional, Any, Tuple, List, Callable
 
-from ..backend.app_kit import NSAlert, NSOpenPanel, NSSavePanel, UTType, NSURL
-from ..base.types import AlertStyle, AlertResponse, Image, DialogResponse
+from ..backend import _MACOS, _IOS
+from ..base.app import get_current_app
+from ..base.errors import NotSupportedError
+from ..base.types import (
+    AlertStyle,
+    AlertResponse,
+    AlertActionStyle,
+    AlertAction,
+    Image,
+    DialogResponse
+)
+
+if _MACOS:
+    from ..backend.app_kit import (
+        NSAlert,
+        NSOpenPanel,
+        NSSavePanel,
+        UTType,
+        NSURL
+    )
+
+if _IOS:
+    from ..backend.ui_kit import (
+        NSAlert,
+        NSOpenPanel,
+        NSSavePanel,
+        UTType,
+        NSURL,
+        UIAlertController,
+        UIAlertControllerStyle,
+        UIAlertAction
+    )
 
 
-class Alert:
-    """ Class that represents a MacOS native Alert modal """
+if _MACOS:
+    class Alert:
+        """ Class that represents a MacOS native Alert modal """
 
-    def __init__(self, *,
-                       style: AlertStyle,
-                       informative_text: str,
-                       message_text: str,
-                       buttons: Optional[Tuple[str]] = None,
-                       custom_image: Optional[Image]=None) -> None:
-        """
-        Create a new custom `Alert` modal. For common alert modals, use the shortcut
-        methods `show_info`, `show_error`, `show_warning`, `show_question` or `show_confirmation`.
+        def __init__(self, *,
+                     style: AlertStyle,
+                     informative_text: str,
+                     message_text: str,
+                     buttons: Optional[Tuple[str]] = None,
+                     custom_image: Optional[Image]=None) -> None:
+            """
+            Create a new custom `Alert` modal. For common alert modals, use the shortcut
+            methods `show_info`, `show_error`, `show_warning`, `show_question` or `show_confirmation`.
 
-        Args:
-            style (AlertStyle): Style of the alert modal.
-            informative_text (str): Informative text / title of the alert modal.
-            message_text (str): Message text / question of the alert modal.
-            buttons (Optional[Tuple[str]], optional): Buttons that should be displayed by the modal. None adds an `Ok` button. Defaults to None.
-            custom_image (Optional[Image], optional): Custom image to display as the modal's icon. None displays the App's icon. Defaults to None.
-        """        
-        self.alert = NSAlert.alloc().init()
-        self.alert.alertStyle = style.value
-        self.alert.informativeText = informative_text
-        self.alert.messageText = message_text
+            Args:
+                style (AlertStyle): Style of the alert modal.
+                informative_text (str): Informative text / title of the alert modal.
+                message_text (str): Message text / question of the alert modal.
+                buttons (Optional[Tuple[str]], optional): Buttons that should be displayed by the modal. None adds an `Ok` button. Defaults to None.
+                custom_image (Optional[Image], optional): Custom image to display as the modal's icon. None displays the App's icon. Defaults to None.
+            """      
+            if not _MACOS:
+                raise NotSupportedError()
 
-        if custom_image:
-            self.alert.icon = custom_image.value
+            self.alert = NSAlert.alloc().init()
+            self.alert.alertStyle = style.value
+            self.alert.informativeText = informative_text
+            self.alert.messageText = message_text
 
-        if buttons:
-            for btn in buttons:
-                self.alert.addButtonWithTitle_(btn)
+            if custom_image:
+                self.alert.icon = custom_image.value
 
-    def show(self) -> AlertResponse:
-        """
-        Show the modal alert.
+            if buttons:
+                for btn in buttons:
+                    self.alert.addButtonWithTitle_(btn)
 
-        Returns:
-            AlertResponse: User response.
-        """        
-        res = self.alert.runModal()
-        return AlertResponse(res)
+        def show(self) -> AlertResponse:
+            """
+            Show the modal alert.
 
-    @classmethod
-    def show_info(cls, *,
-                       informative_text: str,
-                       message_text: str,
-                       custom_image: Optional[Image]=None) -> AlertResponse:
-        """
-        Display an informational alert with an `Ok` button.
-        Example:
-        >>> Alert.show_info('Done', 'Done processing document.')
+            Returns:
+                AlertResponse: User response.
+            """
+            res = self.alert.runModal()
 
-        Args:
-            informative_text (str): Title / Informative text of the alert.
-            message_text (str): Message text of the alert.
-            custom_image (Optional[Image], optional): Custom image to display as the modal's icon. None displays the App's icon. Defaults to None.
+            return AlertResponse(res)
 
-        Returns:
-            AlertResponse: User response.
-        """                       
-        alert = cls(style=AlertStyle.informational,
-                    informative_text=informative_text,
-                    message_text=message_text,
-                    buttons=None,
-                    custom_image=custom_image)
-        return alert.show()
+        @classmethod
+        def show_info(cls, *,
+                      informative_text: str,
+                      message_text: str,
+                      custom_image: Optional[Image]=None) -> AlertResponse:
+            """
+            Display an informational alert with an `Ok` button.
+            Example:
+            >>> Alert.show_info('Done', 'Done processing document.')
 
-    @classmethod
-    def show_error(cls, *,
-                        informative_text: str,
-                        message_text: str,
-                        custom_image: Optional[Image]=None) -> AlertResponse:
-        """
-        Display a critial alert with an `Ok` button.
-        Example:
-        >>> Alert.show_error('Error', 'Failed to process document.')
+            Args:
+                informative_text (str): Title / Informative text of the alert.
+                message_text (str): Message text of the alert.
+                custom_image (Optional[Image], optional): Custom image to display as the modal's icon. None displays the App's icon. Defaults to None.
 
-        Args:
-            informative_text (str): Title / Informative text of the alert.
-            message_text (str): Message text of the alert.
-            custom_image (Optional[Image], optional): Custom image to display as the modal's icon. None displays the App's icon. Defaults to None.
+            Returns:
+                AlertResponse: User response.
+            """                       
+            alert = cls(style=AlertStyle.informational,
+                        informative_text=informative_text,
+                        message_text=message_text,
+                        buttons=None,
+                        custom_image=custom_image)
+            return alert.show()
 
-        Returns:
-            AlertResponse: User response.
-        """        
-        alert = cls(style=AlertStyle.critical,
-                    informative_text=informative_text,
-                    message_text=message_text,
-                    buttons=None,
-                    custom_image=custom_image)
-        return alert.show()
-
-    @classmethod
-    def show_warning(cls, *
+        @classmethod
+        def show_error(cls, *,
                           informative_text: str,
                           message_text: str,
                           custom_image: Optional[Image]=None) -> AlertResponse:
-        """
-        Display a warning alert with an `Ok` button.
-        Example:
-        >>> Alert.show_warning('Done', 'Done processing document. However, some sections failed.')
+            """
+            Display a critial alert with an `Ok` button.
+            Example:
+            >>> Alert.show_error('Error', 'Failed to process document.')
 
-        Args:
-            informative_text (str): Title / Informative text of the alert.
-            message_text (str): Message text of the alert.
-            custom_image (Optional[Image], optional): Custom image to display as the modal's icon. None displays the App's icon. Defaults to None.
+            Args:
+                informative_text (str): Title / Informative text of the alert.
+                message_text (str): Message text of the alert.
+                custom_image (Optional[Image], optional): Custom image to display as the modal's icon. None displays the App's icon. Defaults to None.
 
-        Returns:
-            AlertResponse: User response.
-        """                          
-        alert = cls(style=AlertStyle.warning,
-                    informative_text=informative_text,
-                    message_text=message_text,
-                    buttons=None,
-                    custom_image=custom_image)
-        return alert.show()
+            Returns:
+                AlertResponse: User response.
+            """        
+            alert = cls(style=AlertStyle.critical,
+                        informative_text=informative_text,
+                        message_text=message_text,
+                        buttons=None,
+                        custom_image=custom_image)
+            return alert.show()
 
-    @classmethod
-    def show_question(cls, *,
-                           title: str,
-                           question: str,
-                           custom_image: Optional[Image]=None) -> AlertResponse:
-        """
-        Display an informational alert with a question and two buttons: `Yes` and `No`.
-        Example:
-        >>> Alert.show_question('Quit', 'Are you sure you want to quit?')
+        @classmethod
+        def show_warning(cls, *
+                         informative_text: str,
+                         message_text: str,
+                         custom_image: Optional[Image]=None) -> AlertResponse:
+            """
+            Display a warning alert with an `Ok` button.
+            Example:
+            >>> Alert.show_warning('Done', 'Done processing document. However, some sections failed.')
 
-        The button clicked by the user is identified in the method's response.
-        >>> if Alert.show_question('Quit', 'Are you sure you want to quit?') == AlertResponse.yes:
-                self.quit()
+            Args:
+                informative_text (str): Title / Informative text of the alert.
+                message_text (str): Message text of the alert.
+                custom_image (Optional[Image], optional): Custom image to display as the modal's icon. None displays the App's icon. Defaults to None.
 
-        Args:
-            title (str): Title of the alert.
-            question (str): Question as the message text of the alert.
-            custom_image (Optional[Image], optional): Custom image to display as the modal's icon. None displays the App's icon. Defaults to None.
+            Returns:
+                AlertResponse: User response.
+            """                          
+            alert = cls(style=AlertStyle.warning,
+                        informative_text=informative_text,
+                        message_text=message_text,
+                        buttons=None,
+                        custom_image=custom_image)
+            return alert.show()
 
-        Returns:
-            AlertResponse: User response.
-        """                           
-        alert = cls(style=AlertStyle.informational,
-                    informative_text=title,
-                    message_text=question,
-                    buttons=('Yes', 'No'),
-                    custom_image=custom_image)
-        return alert.show()
+        @classmethod
+        def show_question(cls, *,
+                            title: str,
+                            question: str,
+                            custom_image: Optional[Image]=None) -> AlertResponse:
+            """
+            Display an informational alert with a question and two buttons: `Yes` and `No`.
+            Example:
+            >>> Alert.show_question('Quit', 'Are you sure you want to quit?')
 
-    @classmethod
-    def show_confirmation(cls, *,
-                               title: str,
-                               question: str,
-                               custom_image: Optional[Image]=None) -> AlertResponse:
-        """
-        Display an informational alert with a question and two buttons: `Ok` and `Cancel`.
-        Example:
-        >>> Alert.show_confirmation('Processing document', 'Continue to process the document?')
+            The button clicked by the user is identified in the method's response.
+            >>> if Alert.show_question('Quit', 'Are you sure you want to quit?') == AlertResponse.yes:
+                    self.quit()
 
-        The button clicked by the user is identified in the method's response.
-        >>> if Alert.show_confirmation('Processing document', 'Continue to process the document?') == AlertResponse.ok:
-                self.process_document()
+            Args:
+                title (str): Title of the alert.
+                question (str): Question as the message text of the alert.
+                custom_image (Optional[Image], optional): Custom image to display as the modal's icon. None displays the App's icon. Defaults to None.
 
-        Args:
-            title (str): Title of the alert.
-            question (str): Question as the message text of the alert.
-            custom_image (Optional[Image], optional): Custom image to display as the modal's icon. None displays the App's icon. Defaults to None.
+            Returns:
+                AlertResponse: User response.
+            """                           
+            alert = cls(style=AlertStyle.informational,
+                        informative_text=title,
+                        message_text=question,
+                        buttons=('Yes', 'No'),
+                        custom_image=custom_image)
+            return alert.show()
 
-        Returns:
-            AlertResponse: User response.
-        """      
-        alert = cls(style=AlertStyle.warning,
-                    informative_text=title,
-                    message_text=question,
-                    buttons=('Ok', 'Cancel'),
-                    custom_image=custom_image)
-        return alert.show()
+        @classmethod
+        def show_confirmation(cls, *,
+                              title: str,
+                              question: str,
+                              custom_image: Optional[Image]=None) -> AlertResponse:
+            """
+            Display an informational alert with a question and two buttons: `Ok` and `Cancel`.
+            Example:
+            >>> Alert.show_confirmation('Processing document', 'Continue to process the document?')
+
+            The button clicked by the user is identified in the method's response.
+            >>> if Alert.show_confirmation('Processing document', 'Continue to process the document?') == AlertResponse.ok:
+                    self.process_document()
+
+            Args:
+                title (str): Title of the alert.
+                question (str): Question as the message text of the alert.
+                custom_image (Optional[Image], optional): Custom image to display as the modal's icon. None displays the App's icon. Defaults to None.
+
+            Returns:
+                AlertResponse: User response.
+            """      
+            alert = cls(style=AlertStyle.warning,
+                        informative_text=title,
+                        message_text=question,
+                        buttons=('Ok', 'Cancel'),
+                        custom_image=custom_image)
+            return alert.show()
+
+if _IOS:
+    class Alert:
+        """ Class that represents a MacOS native Alert modal """
+
+        def __init__(self, *,
+                     title: str,
+                     message: str,
+                     action_sheet: bool = False,
+                     buttons: Optional[Tuple[AlertAction]] = None) -> None:
+            
+            if not _IOS:
+                raise NotSupportedError()
+
+            self.alert = UIAlertController.alertControllerWithTitle_message_preferredStyle_(
+                title, message,
+                UIAlertControllerStyle.UIAlertControllerStyleActionSheet.value if action_sheet else
+                UIAlertControllerStyle.UIAlertControllerStyleAlert.value 
+            )
+
+            if buttons:
+                for btn in buttons:
+                    self.alert.addAction_(UIAlertAction.actionWithTitle_style_handler_(
+                        btn.title, btn.style, btn.action
+                    ))
+            else:
+                self.alert.addAction_(UIAlertAction.actionWithTitle_style_handler_(
+                    'Ok', AlertActionStyle.default.value, None
+                ))
+
+        def show(self) -> None:
+            current_view_controller = get_current_app()._scene.view_controller
+            current_view_controller.showViewController_sender_(self.alert, None)
+
+        @classmethod
+        def show_message(cls, *,
+                         title: str,
+                         message: str) -> None:
+            alert = cls(title=title,
+                        message=message)
+            alert.show()
+
+        @classmethod
+        def show_question(cls, *,
+                          title: str,
+                          question: str,
+                          yes_action: Optional[Callable],
+                          no_action: Optional[Callable]):
+            alert = cls(title=title,
+                        message=question,
+                        buttons=[
+                            AlertAction('Yes', AlertActionStyle.default, yes_action),
+                            AlertAction('No', AlertActionStyle.cancel, no_action)
+                        ])
+            alert.show()
+
+        @classmethod
+        def show_confirmation(cls, *,
+                              title: str,
+                              question: str,
+                              ok_action: Optional[Callable],
+                              cancel_action: Optional[Callable]):
+            alert = cls(title=title,
+                        message=question,
+                        buttons=[
+                            AlertAction('Ok', AlertActionStyle.default, ok_action),
+                            AlertAction('Cancel', AlertActionStyle.cancel, cancel_action)
+                            
+                        ])
+            alert.show()
 
 
 class SaveDialog:

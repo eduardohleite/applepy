@@ -4,6 +4,8 @@ from typing import Optional, Callable, Any
 def try_call(fn: Optional[Callable], *args, **kwargs) -> Any:
     if fn and callable(fn):
         return fn(*args, **kwargs)
+    
+try_call_async = try_call
 
 
 class Attachable(property):
