@@ -29,7 +29,7 @@ class Sample(App):
 Sample().run()
 ```
 
-![image](./screenshot.png)
+![image](https://github.com/eduardohleite/applepy/blob/master/screenshot.png)
 
 
 It also works on mobile:
@@ -48,7 +48,7 @@ def main():
     sys.exit(MobileSample().run())
 ```
 
-![image](./screenshot-mobile.png)
+![image](https://github.com/eduardohleite/applepy/blob/master/screenshot-mobile.png)
 
 
 Events can be handled synchronously and asynchronously in the same context:
