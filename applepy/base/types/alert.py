@@ -9,6 +9,7 @@ class AlertStyle(Enum):
 
 
 class AlertResponse(Enum):
+    ack = 0
     ok = 1000
     yes = 1000
     cancel = 1001
