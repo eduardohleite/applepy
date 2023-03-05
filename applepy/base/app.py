@@ -158,8 +158,8 @@ class App(ABC, StackMixin):
                 NSApp.activateIgnoringOtherApps_(True)
         
         if _IOS:
-            from ..scenes import ViewController
-            if isinstance(self._scene, ViewController):
+            from ..scenes import SimpleScreen
+            if isinstance(self._scene, SimpleScreen):
                 self._controller.window = UIWindow.alloc().initWithFrame(UIScreen.mainScreen.bounds)
                 self._controller.window.rootViewController = self._scene.view_controller
                 self._controller.window.makeKeyAndVisible()

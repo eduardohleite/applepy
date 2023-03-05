@@ -2,7 +2,6 @@ from uuid import uuid4
 
 from ..backend import _MACOS, _IOS
 from .. import Scene
-from ..base.app import get_current_app
 from ..base.errors import AddingMultipleChildrenToNonStackableViewError
 from ..base.mixins import Modifiable
 from ..base.errors import NotSupportedError
@@ -13,8 +12,8 @@ if _MACOS:
     from ..backend.app_kit import UIViewController, NSObject, objc_method
 
 
-class ViewController(Scene,
-                     Modifiable):
+class SimpleScreen(Scene,
+                   Modifiable):
     def __init__(self) -> None:
         if _MACOS:
             raise NotSupportedError()
