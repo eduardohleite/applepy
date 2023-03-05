@@ -116,11 +116,18 @@ class Button(Control,
                 self._button = UIButton.buttonWithType_(UIButtonType.UIButtonTypeSystem)
 
             if self.action:
-                self._button.addTarget_action_forControlEvents_(
-                    get_current_app()._controller,
-                    get_current_app().register_action(self._button, self.action),
-                    UIControlEvents.UIControlEventPrimaryActionTriggered
-                )
+                if iscoroutinefunction(self.action):
+                        self._button.addTarget_action_forControlEvents_(
+                        get_current_app()._controller,
+                        get_current_app().register_async_action(self._button, self.action),
+                        UIControlEvents.UIControlEventPrimaryActionTriggered
+                    )
+                else:
+                    self._button.addTarget_action_forControlEvents_(
+                        get_current_app()._controller,
+                        get_current_app().register_action(self._button, self.action),
+                        UIControlEvents.UIControlEventPrimaryActionTriggered
+                    )
         Control.parse(self)
         TitledControl.parse(self, TitledControl)
         BezelColor.parse(self, BezelColor)

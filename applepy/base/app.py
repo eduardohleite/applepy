@@ -15,6 +15,8 @@ if _MACOS:
         NSButton,
         NSStatusBar,
         UIButton,
+        EventLoopPolicy,
+        CocoaLifecycle,
         objc_method,
         SEL
     )
@@ -30,6 +32,8 @@ if _IOS:
         UIApplicationMain,
         NSStringFromClass,
         ObjCInstance,
+        EventLoopPolicy,
+        iOSLifecycle,
         objc_method,
         objc_property,
         SEL
@@ -127,6 +131,10 @@ if _IOS:
         def actionProxy_(self, target):
             _current_app.invoke_action(target)
 
+        @objc_method
+        def actionProxyAsync_(self, target):
+            asyncio.create_task(_current_app.invoke_action_async(target))
+
 
 class App(ABC, StackMixin):
     def __init__(self) -> None:
@@ -171,19 +179,24 @@ class App(ABC, StackMixin):
             return UIApplicationMain(0, None, None, ObjCInstance(NSStringFromClass(_TouchApplicationController)))
         
     def run_async(self) -> int:
-        from rubicon.objc.eventloop import EventLoopPolicy, CocoaLifecycle
-
         global _current_app
         _current_app = self
 
-        if _MACOS:
-            asyncio.set_event_loop_policy(EventLoopPolicy())
+        asyncio.set_event_loop_policy(EventLoopPolicy())
+        self.loop = asyncio.new_event_loop()
 
-            self.loop = asyncio.new_event_loop()
+        if _MACOS:
             self.loop.run_forever(lifecycle=CocoaLifecycle(NSApp))
 
         if _IOS:
-            raise NotSupportedError()
+            class _TouchAsyncApplicationController(_TouchApplicationController):
+                @objc_method
+                def application_didFinishLaunchingWithOptions_(_self, app, options) -> bool:
+                    _current_app.setup_scene()
+                    self.loop.run_forever_cooperatively(lifecycle=iOSLifecycle())
+                    return True
+
+            return UIApplicationMain(0, None, None, ObjCInstance(NSStringFromClass(_TouchAsyncApplicationController)))
 
     def setup_scene(self) -> None:
         self._scene = self.body().parse()

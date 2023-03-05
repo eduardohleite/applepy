@@ -9,11 +9,14 @@ from rubicon.objc import (
     objc_classmethod,
     objc_property
 )
+from rubicon.objc.eventloop import EventLoopPolicy, CocoaLifecycle, iOSLifecycle
 from rubicon.objc.runtime import (
     Foundation,
     SEL,
     load_library,
-    objc_id
+    send_super,
+    objc_id,
+    objc_super
 )
 from ctypes import c_int, c_char_p
 
@@ -32,6 +35,7 @@ NSSavePanel = Any
 
 NSDate = ObjCClass('NSDate')
 NSURL = ObjCClass('NSURL')
+NSDictionary = ObjCClass('NSDictionary')
 
 UTType = ObjCClass('UTType')
 
