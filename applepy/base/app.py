@@ -1,8 +1,10 @@
+import asyncio
+
 from abc import ABC, abstractmethod
 from typing import Callable, Union, Any
 
 from ..backend import _IOS, _MACOS
-from .utils import try_call
+from .utils import try_call, try_call_async
 from .errors import NotSupportedError
 
 if _MACOS:
@@ -105,9 +107,12 @@ if _MACOS:
             _current_app.setup_scene()
 
         @objc_method
-        def menuAction_(self, menu_item):
-            _current_app.invoke_action(menu_item)
+        def actionProxy_(self, target):
+            _current_app.invoke_action(target)
 
+        @objc_method
+        def actionProxyAsync_(self, target):
+            asyncio.create_task(_current_app.invoke_action_async(target))
 
 if _IOS:
     class _TouchApplicationController(NSObject):
@@ -119,8 +124,8 @@ if _IOS:
             return True
         
         @objc_method
-        def menuAction_(self, menu_item):
-            _current_app.invoke_action(menu_item)
+        def actionProxy_(self, target):
+            _current_app.invoke_action(target)
 
 
 class App(ABC, StackMixin):
@@ -135,6 +140,7 @@ class App(ABC, StackMixin):
             self._controller = _TouchApplicationController.alloc().init()
 
         self._actions = {}
+        self._async_actions = {}
 
     def _register_scene(self) -> None:
         if _MACOS:
@@ -163,6 +169,21 @@ class App(ABC, StackMixin):
 
         if _IOS:
             return UIApplicationMain(0, None, None, ObjCInstance(NSStringFromClass(_TouchApplicationController)))
+        
+    def run_async(self) -> int:
+        from rubicon.objc.eventloop import EventLoopPolicy, CocoaLifecycle
+
+        global _current_app
+        _current_app = self
+
+        if _MACOS:
+            asyncio.set_event_loop_policy(EventLoopPolicy())
+
+            self.loop = asyncio.new_event_loop()
+            self.loop.run_forever(lifecycle=CocoaLifecycle(NSApp))
+
+        if _IOS:
+            raise NotSupportedError()
 
     def setup_scene(self) -> None:
         self._scene = self.body().parse()
@@ -170,11 +191,19 @@ class App(ABC, StackMixin):
 
     def register_action(self, caller: Union[NSMenuItem, NSButton, UIButton], action: Callable) -> SEL:
         self._actions[caller] = action
-        return SEL('menuAction:')
+        return SEL('actionProxy:')
+    
+    def register_async_action(self, caller: Union[NSMenuItem, NSButton, UIButton], action: Callable) -> SEL:
+        self._async_actions[caller] = action
+        return SEL('actionProxyAsync:')
 
     def invoke_action(self, caller: Union[NSMenuItem, NSButton, UIButton]):
         action = self._actions.get(caller)
         try_call(action)
+
+    async def invoke_action_async(self, caller: Union[NSMenuItem, NSButton, UIButton]):
+        action = self._async_actions.get(caller)
+        await try_call_async(action)
 
     def quit(self):
         if _MACOS:

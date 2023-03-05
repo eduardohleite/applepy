@@ -39,11 +39,11 @@ if _MACOS:
         """ Class that represents a MacOS native Alert modal """
 
         def __init__(self, *,
-                        style: AlertStyle,
-                        informative_text: str,
-                        message_text: str,
-                        buttons: Optional[Tuple[str]] = None,
-                        custom_image: Optional[Image]=None) -> None:
+                     style: AlertStyle,
+                     informative_text: str,
+                     message_text: str,
+                     buttons: Optional[Tuple[str]] = None,
+                     custom_image: Optional[Image]=None) -> None:
             """
             Create a new custom `Alert` modal. For common alert modals, use the shortcut
             methods `show_info`, `show_error`, `show_warning`, `show_question` or `show_confirmation`.

@@ -1,4 +1,5 @@
-from typing import Callable, Optional, Union
+from typing import Callable, Coroutine, Optional, Union
+from inspect import iscoroutinefunction
 
 from ...base.transform_mixins import (
     TitledControl,
@@ -35,7 +36,7 @@ class Button(Control,
     """ Control that generates a native MacOS PushButton. """
 
     def __init__(self, *, title: Union[str, AbstractBinding],
-                          action: Optional[Callable]=None,
+                          action: Optional[Union[Callable, Coroutine]]=None,
                           style: Optional[ButtonStyle]=None,
                           key_equivalent: Optional[str]=None) -> None:
         """
@@ -84,9 +85,14 @@ class Button(Control,
             self._button = NSButton.buttonWithTitle_target_action_(self.title, None, None)
 
             if self.action:
-                self._button.setAction_(
-                    get_current_app().register_action(self._button, self.action)
-                )
+                if iscoroutinefunction(self.action):
+                    self._button.setAction_(
+                        get_current_app().register_async_action(self._button, self.action)
+                    )
+                else:
+                    self._button.setAction_(
+                        get_current_app().register_action(self._button, self.action)
+                    )
 
         if _IOS:
             if self.style:
