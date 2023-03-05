@@ -48,7 +48,7 @@ def main():
     sys.exit(MobileSample().run())
 ```
 
-![image](https://github.com/eduardohleite/applepy/blob/master/screenshot-mobile.png)
+<img src="https://github.com/eduardohleite/applepy/blob/master/screenshot-mobile.png" height="600">
 
 
 Events can be handled synchronously and asynchronously in the same context:
