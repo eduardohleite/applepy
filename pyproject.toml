@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "applepy-ui"
-version = "0.0.4"
+version = "0.0.5"
 description = "Applepy is a UI library inspired by Swift UI that leverages AppKit and UIKit (soon) to create native MacOS, iOS and iPadOS user interfaces in the Python programming language with a declarative syntax."
 readme = "README.md"
 authors = [{ name = "Eduardo Henrique", email = "eduardohleite@gmail.com" }]
