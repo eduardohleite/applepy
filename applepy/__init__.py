@@ -19,7 +19,9 @@ if _MACOS:
         AlertStyle,
         DialogResponse,
         ProgressStyle,
-        ButtonStyle
+        ButtonStyle,
+        ToolbarStyle,
+        ToolbarDisplayMode
     )
     from .base.binding import (
         bindable,

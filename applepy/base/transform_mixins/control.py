@@ -52,6 +52,52 @@ class TitledControl(TransformMixin):
         self._modifiers.append(__modifier)
 
         return self
+    
+
+class ControlWithLabel(TransformMixin):
+    @bindable(str)
+    def label(self) -> str:
+        return self._label
+
+    @label.setter
+    def label(self, val: str) -> None:
+        self._label = val
+        ControlWithLabel._set(self)
+
+    def __init__(self, label: Union[str, AbstractBinding]='') -> None:
+        if _IOS:
+            raise NotSupportedError()
+    
+        if isinstance(label, AbstractBinding):
+            self.bound_label = label
+            self.bound_label.on_changed.connect(self._on_label_changed)
+            self._label = label.value
+        else:
+            self._label = label
+
+    def _on_label_changed(self, signal, sender, event):
+        self.label = self.bound_label.value
+
+    def _set(self) -> None:
+        if self.ns_object:
+            if _MACOS:
+                self.ns_object.label = self.label
+
+            if _IOS:
+                raise NotSupportedError()
+
+    def set_label(self, label: Union[str, AbstractBinding]):
+        def __modifier():
+            if isinstance(label, AbstractBinding):
+                self.bound_label = label
+                self.bound_label.on_changed.connect(self._on_label_changed)
+                self.label = label.value
+            else:
+                self.label = label
+
+        self._modifiers.append(__modifier)
+
+        return self
 
 
 class Placeholder(TransformMixin):
@@ -357,7 +403,6 @@ class ImageControl(TransformMixin):
                 image_position = image_position.no_image
 
         return image, image_position
-
 
     def _on_image_changed(self, signal, sender, event):
         self.image = self.bound_image.value

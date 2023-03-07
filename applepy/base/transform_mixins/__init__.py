@@ -10,6 +10,7 @@ from .control import(
     Placeholder,
     TextColor,
     TextControl,
-    ImageControl
+    ImageControl,
+    ControlWithLabel
 )
 from .anchors import Width, Height

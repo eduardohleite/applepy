@@ -55,6 +55,8 @@ NSCalendar = ObjCClass('NSCalendar')
 NSDatePicker = ObjCClass('NSDatePicker')
 NSDatePickerCell = ObjCClass('NSDatePickerCell')
 NSProgressIndicator = ObjCClass('NSProgressIndicator')
+NSToolbar = ObjCClass('NSToolbar')
+NSToolbarItem = ObjCClass('NSToolbarItem')
 
 NSApp = NSApplication.sharedApplication
 

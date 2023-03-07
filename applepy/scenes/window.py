@@ -1,17 +1,22 @@
 from typing import Callable, Optional, Union
 from uuid import uuid4
 
-from .. import Scene, Size, Point
-from ..views.menu import MainMenu
-from ..base.binding import AbstractBinding, bindable
-from ..base.mixins import Modifiable
-from ..base.utils import attachable, try_call
-from ..base.view import View
-from ..backend import _MACOS, _IOS
+from ..backend import _IOS
 from ..base.errors import (
     AddingMultipleChildrenToNonStackableViewError,
     NotSupportedError
 )
+
+if _IOS:
+    raise NotSupportedError()
+
+from .. import Scene, Size, Point
+from ..views.menu import MainMenu
+from ..views.containers import Toolbar
+from ..base.binding import AbstractBinding, bindable
+from ..base.mixins import Modifiable
+from ..base.utils import attachable, try_call
+from ..base.view import View
 from ..base.transform_mixins import (
     BackgroundColor,
     AlphaValue,
@@ -19,16 +24,15 @@ from ..base.transform_mixins import (
     TitledControl,
     Visible
 )
-if _MACOS:
-    from ..backend.app_kit import (
-        NSApp,
-        NSObject,
-        NSWindow,
-        NSWindowStyleMask,
-        NSBackingStoreType,
-        NSRect, NSPoint, NSSize,
-        objc_method
-    )
+from ..backend.app_kit import (
+    NSApp,
+    NSObject,
+    NSWindow,
+    NSWindowStyleMask,
+    NSBackingStoreType,
+    NSRect, NSPoint, NSSize,
+    objc_method
+)
 
 
 class Window(Scene,
@@ -85,6 +89,19 @@ class Window(Scene,
     def full_screen(self, val: bool) -> None:
         self._full_screen = val
 
+    @bindable(bool)
+    def show_toolbar(self) -> bool:
+        return self._show_toolbar
+    
+    @show_toolbar.setter
+    def show_toolbar(self, val: bool) -> None:
+        if self.ns_object:
+            if (val and not self._show_toolbar) \
+                or (self._show_toolbar and not val):
+                self.ns_object.toggleToolbarShown_(None)
+
+        self._show_toolbar = val
+
     @attachable(MainMenu)
     def menu(self) -> MainMenu:
         """
@@ -101,13 +118,15 @@ class Window(Scene,
         self._menu = val
         NSApp.mainMenu = val._main_menu
 
-    # @attachable(Toolbar)
-    # def toolbar(self) -> Toolbar:
-    #     return self._toolbar
-
-    # @toolbar.setter
-    # def toolbar(self, val: Toolbar) -> None:
-    #     self._toolbar = val
+    @attachable(Toolbar)
+    def toolbar(self) -> Toolbar:
+        return self._toolbar
+    
+    @toolbar.setter
+    def toolbar(self, val: Toolbar) -> None:
+        self._toolbar = val
+        if self.ns_object:
+            self.ns_object.toolbar = val._toolbar
 
     def __init__(self,
                  *,
@@ -127,6 +146,7 @@ class Window(Scene,
                  hud_window: bool = False,
                  min_size: Optional[Size] = None,
                  max_size: Optional[Size] = None,
+                 show_toolbar: Union[AbstractBinding, bool] = True,
                  on_close: Optional[Callable] = None,
                  on_resized: Optional[Callable] = None,
                  on_moved: Optional[Callable] = None,
@@ -236,6 +256,13 @@ class Window(Scene,
         self._position = position
         self._full_screen = full_screen
 
+        if isinstance(show_toolbar, AbstractBinding):
+            self.bound_show_toolbar = show_toolbar
+            self.bound_show_toolbar.on_changed.connect(self._on_show_toolbar_changed)
+            self._show_toolbar = show_toolbar
+        else:
+            self._show_toolbar = show_toolbar
+
         # regular properties
         self.borderless = borderless
         self.titled = titled
@@ -254,8 +281,8 @@ class Window(Scene,
         self.content_view: Optional[NSObject] = None
 
         # attachables
-        self._menu: Optional[View] = None
-        self._toolbar: Optional[View] = None
+        self._menu: Optional[MainMenu] = None
+        self._toolbar: Optional[Toolbar] = None
 
         # inferred properties
         self.is_main = False
