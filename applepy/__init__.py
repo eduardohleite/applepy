@@ -21,7 +21,8 @@ if _MACOS:
         ProgressStyle,
         ButtonStyle,
         ToolbarStyle,
-        ToolbarDisplayMode
+        ToolbarDisplayMode,
+        ToolbarItemSystemIdentifier
     )
     from .base.binding import (
         bindable,

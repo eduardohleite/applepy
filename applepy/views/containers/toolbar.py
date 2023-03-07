@@ -5,7 +5,12 @@ from inspect import iscoroutinefunction
 from ...backend import _IOS
 from ...base.utils import attachable
 from ...base.app import get_current_app
-from ...base.types import Image, ToolbarDisplayMode, ToolbarStyle
+from ...base.types import (
+    Image,
+    ToolbarDisplayMode,
+    ToolbarStyle,
+    ToolbarItemSystemIdentifier
+)
 from ...base.view import StackedView, View
 from ...base.transform_mixins import (
     ControlWithLabel,
@@ -50,6 +55,7 @@ class ToolbarItem(View,
                  label: Optional[Union[str, AbstractBinding]]=None,
                  image: Optional[Union[Image, AbstractBinding]]=None,
                  action: Optional[Union[Callable, Coroutine]]=None,
+                 system: Optional[ToolbarItemSystemIdentifier]=None,
                  navigational: Union[bool, AbstractBinding]=False) -> None:
         View.__init__(self)
         ControlWithLabel.__init__(self, label)
@@ -58,17 +64,24 @@ class ToolbarItem(View,
         Enable.__init__(self)
         AttachableMixin.__init__(self)
 
-        self.identifier = uuid4().hex[:8]
-        self.action = action
         self._toolbar_item = None
         self._bordered = True
 
-        if isinstance(navigational, AbstractBinding):
-            self.bound_navigational = navigational
-            self.bound_navigational.on_changed.connect(self._on_navigational_changed)
-            self._navigational = navigational.value
+        if system is not None:
+            self._system = True
+            self.identifier = system.value
         else:
-            self._navigational = navigational
+            self._system = False
+            self.identifier = uuid4().hex[:8]
+            self.action = action
+            
+
+            if isinstance(navigational, AbstractBinding):
+                self.bound_navigational = navigational
+                self.bound_navigational.on_changed.connect(self._on_navigational_changed)
+                self._navigational = navigational.value
+            else:
+                self._navigational = navigational
 
     def _on_navigational_changed(self, signal, sender, event):
         self.navigational = self.bound_navigational.value
@@ -77,17 +90,19 @@ class ToolbarItem(View,
         return self._toolbar_item
     
     def parse(self):
-        self._toolbar_item = NSToolbarItem.alloc().initWithItemIdentifier_(self.identifier)
-        self._toolbar_item.bordered = True
+        if not self._system:
+            self._toolbar_item = NSToolbarItem.alloc().initWithItemIdentifier_(self.identifier)
+            self._toolbar_item.bordered = True
+            self._toolbar_item.allowsDuplicatesInToolbar = False
 
-        if self.action:
-            self._toolbar_item.target = get_current_app()._controller
-            if iscoroutinefunction(self.action):
-                self._toolbar_item.action = \
-                    get_current_app().register_async_action(self._toolbar_item, self.action)
-            else:
-                self._toolbar_item.action = \
-                    get_current_app().register_action(self._toolbar_item, self.action)
+            if self.action:
+                self._toolbar_item.target = get_current_app()._controller
+                if iscoroutinefunction(self.action):
+                    self._toolbar_item.action = \
+                        get_current_app().register_async_action(self._toolbar_item, self.action)
+                else:
+                    self._toolbar_item.action = \
+                        get_current_app().register_action(self._toolbar_item, self.action)
         
         View.parse(self)
         ImageControl.parse(self, ImageControl)

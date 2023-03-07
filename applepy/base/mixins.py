@@ -33,7 +33,9 @@ class AttachableMixin(ChildMixin):
 
             name, _ = attachable[0]
 
-            if getattr(self.parent, name):
+            attached = getattr(self.parent, name)
+
+            if attached is not None and type(attached) != list:
                 raise Exception(f'Attachable {name} is already attached.')
 
             setattr(self.parent, name, self)
