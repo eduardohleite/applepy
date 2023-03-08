@@ -111,7 +111,7 @@ if _MACOS:
             _current_app.setup_scene()
 
         @objc_method
-        def actionProxy_(self, target):
+        def actionProxy_(self, target, *args):
             _current_app.invoke_action(target)
 
         @objc_method

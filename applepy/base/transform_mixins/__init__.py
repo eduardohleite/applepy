@@ -3,6 +3,7 @@ from .color import BackgroundColor, AlphaValue, HasShadow
 from .layout import LayoutPadding, LayoutSpacing, LayoutAlignment
 from .control import(
     TitledControl,
+    SubtitledControl,
     BezelColor,
     TintColor,
     ControlWithState,
@@ -10,6 +11,7 @@ from .control import(
     Placeholder,
     TextColor,
     TextControl,
-    ImageControl
+    ImageControl,
+    ControlWithLabel
 )
 from .anchors import Width, Height
