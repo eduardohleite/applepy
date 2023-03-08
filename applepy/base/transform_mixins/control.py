@@ -53,6 +53,48 @@ class TitledControl(TransformMixin):
 
         return self
     
+class SubtitledControl(TransformMixin):
+    @bindable(str)
+    def subtitle(self) -> str:
+        return self._subtitle
+
+    @subtitle.setter
+    def subtitle(self, val: str) -> None:
+        self._subtitle = val
+        SubtitledControl._set(self)
+
+    def __init__(self, subtitle: Union[str, AbstractBinding]='') -> None:
+        if isinstance(subtitle, AbstractBinding):
+            self.bound_subtitle = subtitle
+            self.bound_subtitle.on_changed.connect(self._on_subtitle_changed)
+            self._subtitle = subtitle.value
+        else:
+            self._subtitle = subtitle
+
+    def _on_subtitle_changed(self, signal, sender, event):
+        self.subtitle = self.bound_subtitle.value
+
+    def _set(self) -> None:
+        if self.ns_object:
+            if _MACOS:
+                self.ns_object.subtitle = self.subtitle
+
+            if _IOS:
+                raise NotSupportedError()
+
+    def set_subtitle(self, subtitle: Union[str, AbstractBinding]):
+        def __modifier():
+            if isinstance(subtitle, AbstractBinding):
+                self.bound_subtitle = subtitle
+                self.bound_subtitle.on_changed.connect(self._on_subtitle_changed)
+                self.subtitle = subtitle.value
+            else:
+                self.subtitle = subtitle
+
+        self._modifiers.append(__modifier)
+
+        return self
+    
 
 class ControlWithLabel(TransformMixin):
     @bindable(str)

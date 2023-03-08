@@ -22,6 +22,7 @@ from ..base.transform_mixins import (
     AlphaValue,
     HasShadow,
     TitledControl,
+    SubtitledControl,
     Visible
 )
 from ..backend.app_kit import (
@@ -41,6 +42,7 @@ class Window(Scene,
              AlphaValue,
              HasShadow,
              TitledControl,
+             SubtitledControl,
              Visible):
     """ Display a MacOS Window. """
 
@@ -90,6 +92,16 @@ class Window(Scene,
         self._full_screen = val
 
     @bindable(bool)
+    def show_title(self) -> bool:
+        return self._show_title
+    
+    @show_title.setter
+    def show_title(self, val: bool) -> None:
+        self._show_title = val
+        if self.ns_object:
+            self.ns_object.titleVisibility = 0 if val else 1
+    
+    @bindable(bool)
     def show_toolbar(self) -> bool:
         return self._show_toolbar
     
@@ -132,6 +144,7 @@ class Window(Scene,
                  *,
                  title: Union[AbstractBinding, str],
                  size: Size,
+                 subtitle: Optional[Union[AbstractBinding, str]]=None,
                  position: Point = Point(0, 0),
                  borderless: bool = False,
                  titled: bool = True,
@@ -147,6 +160,7 @@ class Window(Scene,
                  min_size: Optional[Size] = None,
                  max_size: Optional[Size] = None,
                  show_toolbar: Union[AbstractBinding, bool] = True,
+                 show_title: Union[AbstractBinding, bool] = True,
                  on_close: Optional[Callable] = None,
                  on_resized: Optional[Callable] = None,
                  on_moved: Optional[Callable] = None,
@@ -207,6 +221,7 @@ class Window(Scene,
         Modifiable.__init__(self)
         BackgroundColor.__init__(self)
         TitledControl.__init__(self, title)
+        SubtitledControl.__init__(self, subtitle)
 
         @objc_method
         def windowWillClose_(_self, sender):
@@ -262,6 +277,13 @@ class Window(Scene,
             self._show_toolbar = show_toolbar
         else:
             self._show_toolbar = show_toolbar
+
+        if isinstance(show_title, AbstractBinding):
+            self.bound_show_title = show_title
+            self.bound_show_title.on_changed.connect(self._on_show_title_changed)
+            self._show_title = show_title
+        else:
+            self._show_title = show_title
 
         # regular properties
         self.borderless = borderless
@@ -363,6 +385,9 @@ class Window(Scene,
             self.window.minSize = NSSize(self.min_size.width, self.min_size.height)
         if self.max_size:
             self.window.maxSize = NSSize(self.max_size.width, self.max_size.height)
+
+        if not self.show_title:
+            self.window.titleVisibility = 1
 
         Scene.parse(self)
         Modifiable.parse(self)

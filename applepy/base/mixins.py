@@ -26,7 +26,7 @@ class ChildMixin:
 
 class AttachableMixin(ChildMixin):
     def parse(self):
-        attachable = getmembers(type(self.parent), lambda x: isinstance(x, Attachable) and x.type_ == type(self))
+        attachable = getmembers(type(self.parent), lambda x: isinstance(x, Attachable) and isinstance(self, x.type_))
         if any(attachable):
             if len(attachable) > 1:
                 raise Exception('More than one attachable found for a single attachment type.')

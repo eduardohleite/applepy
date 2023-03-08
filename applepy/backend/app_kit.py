@@ -31,6 +31,7 @@ NSStringFromClass.argtypes = [objc_id]
 
 NSDate = ObjCClass('NSDate')
 NSURL = ObjCClass('NSURL')
+NSSet = ObjCClass('NSSet')
 
 NSColor = ObjCClass('NSColor')
 NSApplication = ObjCClass('NSApplication')
@@ -57,6 +58,7 @@ NSDatePickerCell = ObjCClass('NSDatePickerCell')
 NSProgressIndicator = ObjCClass('NSProgressIndicator')
 NSToolbar = ObjCClass('NSToolbar')
 NSToolbarItem = ObjCClass('NSToolbarItem')
+NSToolbarItemGroup = ObjCClass('NSToolbarItemGroup')
 
 NSApp = NSApplication.sharedApplication
 

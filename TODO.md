@@ -13,26 +13,34 @@
 - [x] DatePicker
 - [x] Timer
 - [x] MenuSeparator
-- [x] Spacer
+- [-] Spacer
 - [x] ProgressBar
 - [x] Spinner
 - [ ] ImageView
 - [x] ImageButton
-- [ ] Toolbar
-- [ ] ToolbarButton
+- [-] Toolbar
+- [-] ToolbarItem
 - [x] RadioButton
 - [x] RadioButtonGroup
-- [ ] DecoratedView
+- [ ] NSBox (DecoratedView, Line)
 - [ ] Combobox
+- [-] PartialView
+- [ ] ScrollView
+- [ ] VisualEffectsView
+
+### Layout
+- [ ] GridLayout
+- [ ] TabView
+- [ ] TableView
+- [ ] SplitView
 
 ### Features
-- [-] Async support
+- [x] Async support
 - [x] Submenu action
-- [ ] StatusIcon action
 - [x] Attach Menu to StatusIcon
 - [ ] Notification
 - [x] Alert
-- [-] Dialogs
+- [-] Dialogs (NSPanel)
 - [ ] List binding
 - [-] iOS/UI Kit backend
 - [x] Examples
