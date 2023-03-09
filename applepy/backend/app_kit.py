@@ -59,6 +59,7 @@ NSProgressIndicator = ObjCClass('NSProgressIndicator')
 NSToolbar = ObjCClass('NSToolbar')
 NSToolbarItem = ObjCClass('NSToolbarItem')
 NSToolbarItemGroup = ObjCClass('NSToolbarItemGroup')
+NSBox = ObjCClass('NSBox')
 
 NSApp = NSApplication.sharedApplication
 

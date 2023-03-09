@@ -26,4 +26,5 @@ class Control(View,
             self.parent.ns_object.addArrangedSubview_(self.ns_object)
         else:
             self.parent.set_content_view(self.ns_object)
+        self._add_constraints_to_superview()
         return View.parse(self)
