@@ -110,3 +110,8 @@ class NSDatePickerElementFlags(Enum):
     NSDatePickerElementFlagTimeZone = 0x0010
     NSDatePickerElementFlagYearMonth = 0x00c0
     NSDatePickerElementFlagYearMonthDay = 0x00e0
+
+
+class NSWindowTitleVisibility(Enum):
+    NSWindowTitleVisible = 0
+    NSWindowTitleHidden = 1
