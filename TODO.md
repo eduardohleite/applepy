@@ -49,3 +49,4 @@
 - [x] pip publishing
 - [x] empty scene
 - [ ] custom views for toolbar items
+- [ ] grab modifier

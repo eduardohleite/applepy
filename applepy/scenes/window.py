@@ -30,6 +30,7 @@ from ..backend.app_kit import (
     NSObject,
     NSWindow,
     NSWindowStyleMask,
+    NSWindowTitleVisibility,
     NSBackingStoreType,
     NSRect, NSPoint, NSSize,
     objc_method
@@ -99,7 +100,18 @@ class Window(Scene,
     def show_title(self, val: bool) -> None:
         self._show_title = val
         if self.ns_object:
-            self.ns_object.titleVisibility = 0 if val else 1
+            self.ns_object.titleVisibility = NSWindowTitleVisibility.NSWindowTitleVisible.value \
+                  if val else NSWindowTitleVisibility.NSWindowTitleHidden.value
+            
+    @bindable(bool)
+    def title_bar_transparent(self) -> bool:
+        return self._title_bar_transparent
+    
+    @title_bar_transparent.setter
+    def title_bar_transparent(self, val: bool) -> None:
+        self._title_bar_transparent = val
+        if self.ns_object:
+            self.ns_object.titlebarAppearsTransparent = val
     
     @bindable(bool)
     def show_toolbar(self) -> bool:
@@ -161,6 +173,7 @@ class Window(Scene,
                  max_size: Optional[Size] = None,
                  show_toolbar: Union[AbstractBinding, bool] = True,
                  show_title: Union[AbstractBinding, bool] = True,
+                 title_bar_transparent: Union[AbstractBinding, bool] = False,
                  on_close: Optional[Callable] = None,
                  on_resized: Optional[Callable] = None,
                  on_moved: Optional[Callable] = None,
@@ -285,6 +298,13 @@ class Window(Scene,
         else:
             self._show_title = show_title
 
+        if isinstance(title_bar_transparent, AbstractBinding):
+            self.bound_title_bar_transparent = title_bar_transparent
+            self.bound_title_bar_transparent.on_changed.connect(self._on_title_bar_transparent_changed)
+            self._title_bar_transparent = title_bar_transparent
+        else:
+            self._title_bar_transparent = title_bar_transparent
+
         # regular properties
         self.borderless = borderless
         self.titled = titled
@@ -308,6 +328,15 @@ class Window(Scene,
 
         # inferred properties
         self.is_main = False
+
+    def _on_show_toolbar_changed(self):
+        self.show_toolbar = self.bound_show_toolbar.value
+
+    def _on_show_title_changed(self):
+        self.show_title = self.bound_show_title.value
+
+    def _on_title_bar_transparent_changed(self):
+        self.title_bar_transparent = self.bound_title_bar_transparent.value
 
     def body(self) -> Scene:
         """
@@ -381,13 +410,15 @@ class Window(Scene,
         self.window.delegate = self._controller
         self.window.orderFrontRegardless()
         self.window.title = self.title
+        self.window.titlebarAppearsTransparent = self.title_bar_transparent
+
         if self.min_size:
             self.window.minSize = NSSize(self.min_size.width, self.min_size.height)
         if self.max_size:
             self.window.maxSize = NSSize(self.max_size.width, self.max_size.height)
 
         if not self.show_title:
-            self.window.titleVisibility = 1
+            self.window.titleVisibility = NSWindowTitleVisibility.NSWindowTitleHidden.value
 
         Scene.parse(self)
         Modifiable.parse(self)

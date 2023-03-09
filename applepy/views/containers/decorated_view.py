@@ -190,7 +190,7 @@ class DecoratedView(StackedView,
         """        
         StackedView.__init__(self)
         Control.__init__(self)
-        TitledControl.__init__(self, title)
+        TitledControl.__init__(self, title or '')
         Width.__init__(self)
         Height.__init__(self)
 
