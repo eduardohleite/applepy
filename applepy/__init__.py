@@ -11,7 +11,7 @@ if _MACOS:
         Size,
         Point,
         Alignment,
-        StackOrientation,
+        Orientation,
         StackDistribution,
         ImagePosition,
         Date,
@@ -22,7 +22,10 @@ if _MACOS:
         ButtonStyle,
         ToolbarStyle,
         ToolbarDisplayMode,
-        ToolbarItemSystemIdentifier
+        ToolbarItemSystemIdentifier,
+        TitlePosition,
+        BorderType,
+        BoxType
     )
     from .base.binding import (
         bindable,
@@ -45,7 +48,7 @@ if _IOS:
         Size,
         Point,
         Alignment,
-        StackOrientation,
+        Orientation,
         StackDistribution,
         ImagePosition,
         Date,

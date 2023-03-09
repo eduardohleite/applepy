@@ -29,7 +29,7 @@ class Alignment(BindableMixin, Enum):
     ios_last_baseline = 5
 
 
-class StackOrientation(BindableMixin, Enum):
+class Orientation(BindableMixin, Enum):
     horizontal = 0
     vertical = 1
 

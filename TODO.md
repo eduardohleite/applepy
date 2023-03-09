@@ -18,11 +18,11 @@
 - [x] Spinner
 - [ ] ImageView
 - [x] ImageButton
-- [-] Toolbar
-- [-] ToolbarItem
+- [x] Toolbar
+- [x] ToolbarItem
 - [x] RadioButton
 - [x] RadioButtonGroup
-- [ ] NSBox (DecoratedView, Line)
+- [x] NSBox (DecoratedView, Line)
 - [ ] Combobox
 - [-] PartialView
 - [ ] ScrollView
@@ -48,3 +48,4 @@
 - [x] pip packaging
 - [x] pip publishing
 - [x] empty scene
+- [ ] custom views for toolbar items

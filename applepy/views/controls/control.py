@@ -14,6 +14,9 @@ class Control(View,
         View.__init__(self)
         Enable.__init__(self)
 
+    def _add_constraints_to_superview(self):
+        pass
+
     def parse(self) -> View:
         """
         View's parse method.
@@ -26,4 +29,5 @@ class Control(View,
             self.parent.ns_object.addArrangedSubview_(self.ns_object)
         else:
             self.parent.set_content_view(self.ns_object)
+        self._add_constraints_to_superview()
         return View.parse(self)

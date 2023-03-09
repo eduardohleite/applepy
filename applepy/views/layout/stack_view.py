@@ -1,6 +1,6 @@
 from typing import Optional, Union
 
-from ... import StackedView, Alignment, StackOrientation, StackDistribution
+from ... import StackedView, Alignment, Orientation, StackDistribution
 from ...backend import _MACOS, _IOS
 from ...base.binding import bindable
 from ...base.mixins import Modifiable
@@ -28,8 +28,8 @@ class StackView(StackedView,
 
     """ Layout view horizontally or vertically in a stack. """
 
-    @bindable(StackOrientation)
-    def orientation(self) -> StackOrientation:
+    @bindable(Orientation)
+    def orientation(self) -> Orientation:
         """
         Stack layout orientation.
         Data Binding: This property is a read-only bind. Setting this value will have no effect.
@@ -40,7 +40,7 @@ class StackView(StackedView,
         return self._orientation
 
     @orientation.setter
-    def orientation(self, val: StackOrientation) -> None:
+    def orientation(self, val: Orientation) -> None:
         self._orientation = val
         if self._stack_view:
             self._stack_view.orientation = val.value
@@ -62,7 +62,7 @@ class StackView(StackedView,
         if self._stack_view:
             self._stack_view.distribution = val.value
 
-    def __init__(self, *, orientation: StackOrientation,
+    def __init__(self, *, orientation: Orientation,
                           alignment: Optional[Alignment]=None,
                           distribution: Optional[StackDistribution]=None) -> None:
         """
@@ -191,7 +191,7 @@ class HorizontalStack(StackView):
             if _IOS:
                 alignment = Alignment.ios_center
 
-        super().__init__(orientation=StackOrientation.horizontal,
+        super().__init__(orientation=Orientation.horizontal,
                          alignment=alignment,
                          distribution=distribution)
 
@@ -232,7 +232,7 @@ class VerticalStack(StackView):
             if _IOS:
                 alignment = Alignment.ios_center
 
-        super().__init__(orientation=StackOrientation.vertical,
+        super().__init__(orientation=Orientation.vertical,
                          alignment=alignment,
                          distribution=distribution)
 
@@ -263,12 +263,12 @@ class Spacer(View, BackgroundColor):
         """
         if _MACOS:
             self._stack_view = NSStackView.alloc().init()
-            self._stack_view.orientation = StackOrientation.vertical
+            self._stack_view.orientation = Orientation.vertical
             self._stack_view.distribution = StackDistribution.fill
 
         if _IOS:
             self._stack_view = UIStackView.alloc().init()
-            self._stack_view.axis = StackOrientation.vertical
+            self._stack_view.axis = Orientation.vertical
             self._stack_view.distribution = StackDistribution.fill
 
         self.parent.ns_object.addArrangedSubview_(self.ns_object)
