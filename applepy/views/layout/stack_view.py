@@ -147,6 +147,19 @@ class StackView(StackedView,
         else:
             self.parent.set_content_view(self.ns_object)
 
+        if isinstance(self.parent, Scene):
+            # grab parent
+            top_contraint = self._stack_view.topAnchor.constraintEqualToAnchor(self._stack_view.superview.topAnchor)
+            top_contraint.active = True
+            bottom_contraint = self._stack_view.bottomAnchor.constraintEqualToAnchor(self._stack_view.superview.bottomAnchor)
+            bottom_contraint.active = True
+            left_contraint = self._stack_view.leftAnchor.constraintEqualToAnchor(self._stack_view.superview.leftAnchor)
+            left_contraint.active = True
+            right_contraint = self._stack_view.rightAnchor.constraintEqualToAnchor(self._stack_view.superview.rightAnchor)
+            right_contraint.active = True
+        else:
+            self._add_constraints_to_superview()
+
         StackedView.parse(self)
         LayoutAlignment.parse(self, LayoutAlignment)
         LayoutSpacing.parse(self, LayoutSpacing)

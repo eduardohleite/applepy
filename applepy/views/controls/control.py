@@ -14,9 +14,6 @@ class Control(View,
         View.__init__(self)
         Enable.__init__(self)
 
-    def _add_constraints_to_superview(self):
-        pass
-
     def parse(self) -> View:
         """
         View's parse method.

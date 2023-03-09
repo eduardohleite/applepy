@@ -291,7 +291,7 @@ class Separator(Control,
             width_constraint.active = True
             top_contraint = self._box.topAnchor.constraintEqualToAnchor_constant_(self._box.superview.topAnchor, padding[0])
             top_contraint.active = True
-            bottom_contraint = self._box.bottomAnchor.constraintEqualToAnchor_constant_(self._box.superview.bottomAnchor, padding[1])
+            bottom_contraint = self._box.bottomAnchor.constraintEqualToAnchor_constant_(self._box.superview.bottomAnchor, -padding[1])
             bottom_contraint.active = True
 
     def parse(self) -> Control:
